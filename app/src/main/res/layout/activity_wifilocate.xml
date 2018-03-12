@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/locate_area_header_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="50dp"
+        android:layout_alignParentLeft="true"
+        style="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Title"
+        android:text="Locate me"/>
+
+
+    <TextView
+        android:id="@+id/locate_area_status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="-"
+        />
+
+
+    <Button
+        android:id="@+id/wifi_get_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Where am I?"
+        android:layout_gravity="center"
+        style="@style/Widget.AppCompat.Button.Colored"/>
+
+        <TextView
+            android:id="@+id/locate_area_prediction_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="-"
+            />
+    </LinearLayout>
+    <!-- done button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <Button
+            android:id="@+id/wifi_locate_done_button"
+            style="@style/Widget.AppCompat.Button.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:drawableEnd="@drawable/ic_locate"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:text="Done locating " />
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>

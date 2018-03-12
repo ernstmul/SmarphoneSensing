@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- area select and start -->
+    <ScrollView
+        android:id='@+id/training_setup_view'
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+
+        <!-- area select and start -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="50dp"
+                android:layout_alignParentLeft="true"
+                style="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Title"
+                android:text="Wifi training"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select area:"
+                    />
+                <Spinner
+                    android:id="@+id/area_spinner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
+
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/start_wifi_train"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Start "
+                android:layout_gravity="center"
+                android:drawableEnd="@drawable/ic_balloon"
+                style="@style/Widget.AppCompat.Button.Colored"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <ScrollView
+        android:id='@+id/training_progress_view'
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+
+        <!-- during training -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/training_area_header_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="50dp"
+                android:layout_alignParentLeft="true"
+                style="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Title"
+                android:text="Training area 0 (2 measurements)"/>
+
+
+            <TextView
+                android:id="@+id/training_area_status_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Press button to perform measurement"
+                />
+
+
+        <Button
+            android:id="@+id/wifi_get_measurement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Get measurement "
+            android:layout_gravity="center"
+            style="@style/Widget.AppCompat.Button.Colored"/>
+
+        <Button
+            android:id="@+id/wifi_end_area_measurement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="End training area "
+            android:layout_gravity="center"
+            android:drawableEnd="@drawable/ic_finish"
+            style="@style/Widget.AppCompat.Button.Small"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+    <!-- done button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <Button
+            android:id="@+id/wifi_train_done_button"
+            style="@style/Widget.AppCompat.Button.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:drawableEnd="@drawable/ic_train"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:text="Done training " />
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>
