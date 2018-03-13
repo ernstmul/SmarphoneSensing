@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Pattern;
 
 import nl.tudelft.smartphonesensing.HomeActivity;
@@ -83,9 +85,31 @@ public class LocateActivity  extends AppCompatActivity {
 
                 //calculate location
                 calculateLocation();
+
+                // disable button for 2 seconds
+                disableGetLocationButton();
             }
         });
     }
+
+    private void disableGetLocationButton(){
+        wifi_get_location.setEnabled(false);
+        Timer buttonTimer = new Timer();
+        buttonTimer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        wifi_get_location.setEnabled(true);
+                    }
+                });
+            }
+        }, 2000);
+    }
+
 
     private void calculateLocation(){
         Log.d(TAG, "Determining current location ... ");
@@ -107,6 +131,7 @@ public class LocateActivity  extends AppCompatActivity {
         Log.d(TAG, currentScanResultList.toString());
 
         Double[] prior = new Double[cellCount];
+        Log.d(TAG, "reset prior:" + prior.toString());
 
         // 3. Set the intial belief values into the prior
         for(Integer cellIndex = 0; cellIndex < cellCount; cellIndex++){
@@ -114,7 +139,8 @@ public class LocateActivity  extends AppCompatActivity {
         }
 
         //loop through the list
-        for(ScanResult accesspoint:currentScanResultList){
+        for(Integer checkCount = 0; checkCount < currentScanResultList.size(); checkCount++){
+            ScanResult accesspoint = currentScanResultList.get(checkCount);
             //Log.d(TAG, accesspoint.toString());
 
             //make sure the accesspoint is known in the trained list
@@ -146,7 +172,10 @@ public class LocateActivity  extends AppCompatActivity {
                 prior = normalize(prior);
 
                 // add stopping criteria? TODO
-
+                if(isMatchingStoppingCriteria(prior)){
+                    //make it stop
+                    checkCount = currentScanResultList.size();
+                }
             }
 
         }
@@ -177,6 +206,15 @@ public class LocateActivity  extends AppCompatActivity {
         locate_area_prediction_text.setText("I'm in : " + (cellChosenIndex + 1) + "\n\n" + prob);
     }
 
+    private boolean isMatchingStoppingCriteria(Double[] prior){
+        Double maxVal = 0.0;
+
+        for(Double val:prior){
+            if(val > maxVal){maxVal = val;}
+        }
+        // threshold for cell probability
+        return (maxVal > 0.5);
+    }
     /*
      * compute the Gaussion for the cell vector
      */
