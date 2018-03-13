@@ -45,7 +45,7 @@ public class LocateActivity  extends AppCompatActivity {
     HashMap<String, TrainedSet[]> trained = new HashMap<String, TrainedSet[]>();
 
     //set number of cells
-    private Integer cellCount = 16;
+    private Integer cellCount = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

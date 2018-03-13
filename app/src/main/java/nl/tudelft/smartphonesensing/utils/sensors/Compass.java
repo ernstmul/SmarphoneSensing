@@ -56,6 +56,7 @@ public class Compass implements SensorEventListener{
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        //more interesting info: https://developer.android.com/guide/topics/sensors/sensors_position.html
         float azimuth = Math.round( ( ( Math.toDegrees( event.values[0] ) + 360 ) % 360) * 10 ) / 10;
 
         wifi_status_text.setText(azimuth + "° ");

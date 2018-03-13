@@ -57,7 +57,7 @@ public class TrainActivity extends AppCompatActivity {
     private List<AccessPointMatrix> matrices;
 
     //set number of cells
-    Integer cellCount = 16;
+    Integer cellCount = 20;
     Integer[] timesTrained;
 
     //hashmap with trained data
@@ -132,6 +132,9 @@ public class TrainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                Log.d(TAG, "Creating csv");
+                wifi_train_done_button.setText("Creating CSV ");
+
                 //create the csv files
                 //generate the csv's
                 for(AccessPointMatrix matrix : matrices){
@@ -141,7 +144,7 @@ public class TrainActivity extends AppCompatActivity {
                 }
 
                 //now return home
-                goBackToHome();
+               goBackToHome();
             }
         });
 
