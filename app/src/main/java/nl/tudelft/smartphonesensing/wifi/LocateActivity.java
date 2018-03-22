@@ -133,12 +133,6 @@ public class LocateActivity  extends AppCompatActivity {
             prior[cellIndex] = 1.0/cellCount;
         }
 
-<<<<<<< HEAD
-        //loop through the list
-        for(Integer checkCount = 0; checkCount < currentScanResultList.size(); checkCount++){
-            ScanResult accesspoint = currentScanResultList.get(checkCount);
-            //Log.d(TAG, accesspoint.toString());
-=======
         // create initial probability vector containing sum of probabilities
         Double[] posteriorSumAP = new Double[cellCount];
 
@@ -180,7 +174,6 @@ public class LocateActivity  extends AppCompatActivity {
                  * all the APs, re-scan and re-calculate. In this case, use the previously determined
                  * belief as the prior, instead of [0.05 0.05 ... 0.05] for cellCount of 20
                  */
->>>>>>> alternative_bayesian
 
                 //make sure the accesspoint is known in the trained list
                 if (trained.get(accesspoint.BSSID) != null) {
@@ -226,13 +219,6 @@ public class LocateActivity  extends AppCompatActivity {
                     }
 
 
-<<<<<<< HEAD
-                // add stopping criteria? TODO
-                if(isMatchingStoppingCriteria(prior)){
-                    //make it stop
-                    checkCount = currentScanResultList.size();
-                }
-=======
                     // add stopping criteria?
 //                    if (isMatchingStoppingCriteria(normalize(posteriorSumAP))) {
 //                        //make it stop
@@ -244,7 +230,6 @@ public class LocateActivity  extends AppCompatActivity {
 
             if (isMatchingStoppingCriteria(normalize(posteriorSumAP))){
                 thresholdReached = true;
->>>>>>> alternative_bayesian
             }
 
 
@@ -336,13 +321,10 @@ public class LocateActivity  extends AppCompatActivity {
         locate_area_prediction_text.setText("I'm in : " + (cellChosenIndex + 1) + "\n\n" + prob);
     }
 
-<<<<<<< HEAD
-=======
 //    private double[] determinePosterior(){
 //
 //    }
 
->>>>>>> alternative_bayesian
     private boolean isMatchingStoppingCriteria(Double[] prior){
         Double maxVal = 0.0;
 
