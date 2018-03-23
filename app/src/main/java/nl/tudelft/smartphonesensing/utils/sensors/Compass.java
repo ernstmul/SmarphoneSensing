@@ -41,7 +41,7 @@ public class Compass implements SensorEventListener{
         //check if we have the correct sensors
         if(hasCorrectSensors()){
             mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
-                    SensorManager.SENSOR_DELAY_GAME);
+                    SensorManager.SENSOR_STATUS_ACCURACY_HIGH);
         }
     }
 
@@ -57,10 +57,28 @@ public class Compass implements SensorEventListener{
     @Override
     public void onSensorChanged(SensorEvent event) {
         //more interesting info: https://developer.android.com/guide/topics/sensors/sensors_position.html
-        float azimuth = Math.round( ( ( Math.toDegrees( event.values[0] ) + 360 ) % 360) * 10 ) / 10;
+        //float azimuth = Math.round( ( ( Math.toDegrees( event.values[0] ) + 360 ) % 360) * 10 ) / 10;
 
-        wifi_status_text.setText(azimuth + "° ");
-        compass_needle.setRotation(azimuth);
+        if(Math.abs(currentDegree - event.values[0]) > 2){
+            String direction;
+
+            if(currentDegree - event.values[0] > 0){
+                direction = " moving counter clockwise";
+            }
+            else{
+                direction = " moving clockwise";
+            }
+            wifi_status_text.setText(Math.round(event.values[0]*10)/10 + " ° " + direction);
+            currentDegree = event.values[0];
+
+        }
+        else{
+            currentDegree = event.values[0];
+            wifi_status_text.setText(Math.round(event.values[0]*10)/10 + " ° ");
+        }
+
+
+        compass_needle.setRotation(-event.values[0]);
     }
 
     @Override
