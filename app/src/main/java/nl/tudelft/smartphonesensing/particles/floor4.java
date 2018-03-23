@@ -44,7 +44,17 @@ public class floor4 {
         //floor below 9 (as seen on the official floorplan)
         closed_areas.add(functionDimensionsToClosedArea(0,29500,3600,33800));
 
-        //todo finish remaining floors
+        //floor above 9 (as seen on the official floorplan)
+        closed_areas.add(functionDimensionsToClosedArea(5900,29500,9400,33800));
+
+        //island between 16, 6, 11, 14 and 15
+        closed_areas.add(functionDimensionsToClosedArea(7500,21600,13100,26000));
+        closed_areas.add(functionDimensionsToClosedArea(7500,20400,11700,21600));
+
+        //island from area 1, minus area 1
+        closed_areas.add(functionDimensionsToClosedArea(9200,7800,13100,12200));
+        closed_areas.add(functionDimensionsToClosedArea(7500,12200,11200,13600));
+        closed_areas.add(functionDimensionsToClosedArea(7500,13600,11700,15800));
 
         return closed_areas;
     }

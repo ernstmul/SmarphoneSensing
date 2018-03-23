@@ -19,7 +19,7 @@ public class Particle {
 
     public ShapeDrawable particle;
 
-    private Integer particle_size = 10;
+    private Integer particle_size = 5;
 
     public Particle(Canvas c, Integer width, Integer height){
         //store the canvas, width and height

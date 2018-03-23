@@ -27,8 +27,8 @@ public class ParticlesActivity  extends AppCompatActivity {
     private static String TAG = "ParticlesActivity";
 
     //configuration
-    private static Integer particlesAmount = 10;
-    private static Boolean shouldDrawClosedAreas = true;
+    private static Integer particlesAmount = 1000;
+    private static Boolean shouldDrawClosedAreas = false;
 
     private Canvas canvas;
     private List<ShapeDrawable> walls;
@@ -90,7 +90,7 @@ public class ParticlesActivity  extends AppCompatActivity {
             Particle particle = new Particle(canvas, width, height);
 
             //place random
-            while(isCollision(particle) && isInClosedArea(particle)){
+            while(isCollision(particle) || isInClosedArea(particle)){
                 particle.drawRandomPosition();
             }
 
