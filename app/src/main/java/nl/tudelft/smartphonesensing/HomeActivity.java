@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import nl.tudelft.smartphonesensing.particles.ParticlesActivity;
 import nl.tudelft.smartphonesensing.utils.sensors.Barometer;
 import nl.tudelft.smartphonesensing.utils.sensors.Compass;
 import nl.tudelft.smartphonesensing.utils.sensors.Steps;
@@ -30,6 +31,8 @@ public class HomeActivity extends AppCompatActivity {
     private Button refresh_button;
     private Button wifi_train_button;
     private Button wifi_locate_button;
+    private Button particle_3rd_floor_button;
+    private Button particle_4th_floor_button;
 
     private WifiSensor wifi;
     private Compass compass;
@@ -77,6 +80,8 @@ public class HomeActivity extends AppCompatActivity {
         refresh_button = (Button) findViewById(R.id.refresh_button);
         wifi_train_button = (Button) findViewById(R.id.wifi_train_button);
         wifi_locate_button = (Button) findViewById(R.id.wifi_locate_button);
+        particle_3rd_floor_button = (Button) findViewById(R.id.particle_3rd_floor_button);
+        particle_4th_floor_button = (Button) findViewById(R.id.particle_4th_floor_button);
 
         //click listener for refresh button
         refresh_button.setOnClickListener(new View.OnClickListener() {
@@ -105,6 +110,24 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        //click listener for 3rd floor particles button
+        particle_3rd_floor_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //refresh the information
+                startParticles(3);
+            }
+        });
+
+        //click listener for 4th floor particles button
+        particle_4th_floor_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //refresh the information
+                startParticles(4);
+            }
+        });
+
 
         //create the sensors
         wifi = new WifiSensor(getApplicationContext());
@@ -128,6 +151,20 @@ public class HomeActivity extends AppCompatActivity {
         // start LocalizationActivity.class
         Intent myIntent = new Intent(HomeActivity.this,
                 TrainActivity.class);
+        startActivity(myIntent);
+    }
+
+    /**
+     * go to start particles activity
+     */
+    public void startParticles(Integer floor){
+        // start LocalizationActivity.class
+        Bundle bundle = new Bundle();
+        bundle.putInt("floor", floor);
+
+        Intent myIntent = new Intent(HomeActivity.this,
+                ParticlesActivity.class);
+        myIntent.putExtras(bundle);
         startActivity(myIntent);
     }
 
