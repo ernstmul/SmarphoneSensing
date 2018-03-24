@@ -1,5 +1,6 @@
 package nl.tudelft.smartphonesensing.particles;
 
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -11,18 +12,26 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.view.View;
+import android.widget.TextView;
+
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import nl.tudelft.smartphonesensing.R;
 
+
 /**
  * Created by ernstmulders on 23/03/2018.
  */
 
-public class ParticlesActivity  extends AppCompatActivity {
+public class ParticlesActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static String TAG = "ParticlesActivity";
 
@@ -34,7 +43,15 @@ public class ParticlesActivity  extends AppCompatActivity {
     private List<ShapeDrawable> walls;
     private List<ShapeDrawable> closed_areas;
     private List<Particle> particles;
+    private Particle currentLocation;
 
+    // define buttons
+    private Button up,left,right,down,reset;
+    // define textview
+    private TextView textStatus;
+
+    private int actualX = 500;
+    private int actualY = 220;
 
 
     @Override
@@ -48,6 +65,23 @@ public class ParticlesActivity  extends AppCompatActivity {
         display.getSize(size);
         int width = size.x;
         int height = size.y;
+
+        // set buttons
+        up = (Button) findViewById(R.id.buttonUp);
+        down = (Button) findViewById(R.id.buttonDown);
+        left = (Button) findViewById(R.id.buttonLeft);
+        right = (Button) findViewById(R.id.buttonRight);
+        reset = (Button) findViewById(R.id.buttonReset);
+
+        // set listeners
+        up.setOnClickListener(this);
+        down.setOnClickListener(this);
+        left.setOnClickListener(this);
+        right.setOnClickListener(this);
+        reset.setOnClickListener(this);
+
+        // set the text view
+        textStatus = (TextView) findViewById(R.id.textViewStatus);
 
         // create a canvas
         ImageView canvasView = (ImageView) findViewById(R.id.canvas);
@@ -98,11 +132,18 @@ public class ParticlesActivity  extends AppCompatActivity {
             particles.add(particle);
         }
 
+        currentLocation = new Particle(canvas, width, height);
+        while(isCollision(currentLocation) || isInClosedArea(currentLocation)){
+            currentLocation.drawSpecifedPosition(actualX,actualY);
+        }
+
+        particles.add(currentLocation);
+
         //and redraw everything
         redraw();
 
 
-        Log.d(TAG, "load floor:" + floor);
+        Log.d(TAG, "load floor: " + floor);
 
     }
 
@@ -144,6 +185,46 @@ public class ParticlesActivity  extends AppCompatActivity {
         }
 
         return false;
+    }
+
+    @Override
+    public void onClick(View v){
+        Log.d(TAG, "Button pressed");
+
+        // move current location (big red particle)
+        switch (v.getId()) {
+            case R.id.buttonUp:{
+                textStatus.setText("Up");
+                actualY = actualY - 10;
+                currentLocation.drawSpecifedPosition(actualX,actualY);
+                break;
+            }
+            case R.id.buttonDown:{
+                textStatus.setText("Down");
+                actualY = actualY + 10;
+                currentLocation.drawSpecifedPosition(actualX,actualY);
+                break;
+            }
+            case R.id.buttonLeft:{
+                textStatus.setText("Left");
+                actualX = actualX - 10;
+                currentLocation.drawSpecifedPosition(actualX,actualY);
+                break;
+            }
+            case R.id.buttonRight:{
+                textStatus.setText("Right");
+                actualX = actualX + 10;
+                currentLocation.drawSpecifedPosition(actualX,actualY);
+                break;
+            }
+        }
+
+        // apply motion model to all particles
+
+
+
+        redraw();
+
     }
 
     /**

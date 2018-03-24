@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.util.Log;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -12,6 +13,8 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 
 public class Particle {
+
+    private String TAG = "Particle class: ";
 
     private Canvas canvas;
     private Integer screen_width;
@@ -27,6 +30,25 @@ public class Particle {
         screen_width = width;
         screen_height = height;
     }
+
+
+    public void drawSpecifedPosition(int posX, int posY){
+
+        //int posX = ThreadLocalRandom.current().nextInt(0, screen_width - (particle_size/2));
+        //int posY = ThreadLocalRandom.current().nextInt(0, screen_height - (particle_size / 2));
+
+        particle = new ShapeDrawable(new OvalShape());
+        particle.getPaint().setColor(Color.RED);
+        particle.setBounds(posX-5*particle_size,posY-5*particle_size,posX+5*particle_size,posY+5*particle_size);
+        particle.draw(canvas);
+        Log.d(TAG, "Specified particle created: ");
+        Log.d(TAG, String.valueOf(posX));
+        Log.d(TAG, String.valueOf(posY));
+    }
+
+//    public void applyMotionModel(double orientation, double distance, double variance){
+//
+//    }
 
     /**
      * draw particle on a random position

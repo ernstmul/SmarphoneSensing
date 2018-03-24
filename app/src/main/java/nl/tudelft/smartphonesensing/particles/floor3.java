@@ -49,7 +49,91 @@ public class floor3 {
 
     public List getWalls(int width, int height){
         Log.d(TAG, "screen x:" + width + " y:" + height);
+
         //initialize walls
+        walls = new ArrayList<>();
+
+        /*
+         * Door width and position variables to set
+         */
+
+        // distance from top left corner of cell 17 (staircase) to door
+        int cell17DoorFromTop = 350;
+        // door width at cell 17 staircase
+        int cell17DoorWidth = 1500;
+
+        // height from top left corner of cell 18 to door
+        int cell18DoorFromTop = 300;
+        // door at cell 18 width
+        int cell18DoorWidth = 1500;
+
+        // distance from top left corner of cell 20 to door
+        int cell20DoorFromTop = 250;
+        // door width at cell 20
+        int cell20DoorWidth = 1500;
+
+        /*
+         * Define walls of floor 3
+         */
+
+        //outlines
+        walls.add(functionDimensionsToWall(0,0,14400,true));
+        walls.add(functionDimensionsToWall(0,0,26000,false));
+        walls.add(functionDimensionsToWall(14400,0,26000,false));
+        walls.add(functionDimensionsToWall(0,26000,14400,true));
+
+        //island office parts 1
+        walls.add(functionDimensionsToWall(7500,0,6900,true));
+        walls.add(functionDimensionsToWall(7500,1800,3300,true));
+        walls.add(functionDimensionsToWall(7500,0,cell18DoorFromTop,false));
+        walls.add(functionDimensionsToWall(7500,cell18DoorFromTop+cell18DoorWidth,5100-cell18DoorFromTop+cell18DoorWidth,false));
+
+        walls.add(functionDimensionsToWall(10800,0,4400,false));
+        walls.add(functionDimensionsToWall(7500,4400,6900,true));
+        walls.add(functionDimensionsToWall(7500,5800,4200,true));
+        walls.add(functionDimensionsToWall(9300,4400,1400,false));
+        walls.add(functionDimensionsToWall(7500,8000,4200,true));
+
+
+        walls.add(functionDimensionsToWall(11700,5800,2400,false));
+
+
+        //island office parts 2
+        walls.add(functionDimensionsToWall(7500,10100,4200,true));
+        // staircase
+        walls.add(functionDimensionsToWall(7500,10100,cell17DoorFromTop,false));
+        walls.add(functionDimensionsToWall(7500,10100+cell17DoorFromTop+cell17DoorWidth,8200-(cell17DoorFromTop+cell17DoorWidth),false));
+        walls.add(functionDimensionsToWall(7500,18200,5600,true));
+        walls.add(functionDimensionsToWall(7500,13800,5600,true));
+        walls.add(functionDimensionsToWall(13100,13800,4600,false));
+        walls.add(functionDimensionsToWall(11700,10100,3700,false));
+        walls.add(functionDimensionsToWall(7500,12400,4200,true));
+
+        //long vertical corridor left wall
+        walls.add(functionDimensionsToWall(5200,0,18450,false));
+
+        //rooms left side off left corridor wall
+        walls.add(functionDimensionsToWall(0,9200,5200,true));
+        walls.add(functionDimensionsToWall(0,12600,5200,true));
+        walls.add(functionDimensionsToWall(0,16000,5200,true));
+        walls.add(functionDimensionsToWall(0,18300,5200,true));
+        walls.add(functionDimensionsToWall(2100,18300,3400,false));
+
+        //bottom offices
+        walls.add(functionDimensionsToWall(0,21700,9400,true));
+        walls.add(functionDimensionsToWall(3600,21700,4300,false));
+        walls.add(functionDimensionsToWall(5900,21700,4300,false));
+
+        // cell 20
+        walls.add(functionDimensionsToWall(9400,19500,cell20DoorFromTop,false));
+        walls.add(functionDimensionsToWall(9400,19500+cell20DoorFromTop+cell20DoorWidth,6500-cell20DoorFromTop-cell20DoorWidth,false));
+        walls.add(functionDimensionsToWall(9400,19500,5000,true));
+
+        return walls;
+
+
+
+        /*
         walls = new ArrayList<>();
 
         //outlines
@@ -104,6 +188,7 @@ public class floor3 {
 
 
         return walls;
+        */
     }
 
 
