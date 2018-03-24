@@ -24,6 +24,10 @@ public class Particle {
 
     private Integer particle_size = 5;
 
+    // particle current location
+    private int posX;
+    private int posY;
+
     public Particle(Canvas c, Integer width, Integer height){
         //store the canvas, width and height
         canvas = c;
@@ -31,38 +35,59 @@ public class Particle {
         screen_height = height;
     }
 
+    /**
+     * get particle's current position
+     */
 
-    public void drawSpecifedPosition(int posX, int posY){
-
-        //int posX = ThreadLocalRandom.current().nextInt(0, screen_width - (particle_size/2));
-        //int posY = ThreadLocalRandom.current().nextInt(0, screen_height - (particle_size / 2));
-
-        particle = new ShapeDrawable(new OvalShape());
-        particle.getPaint().setColor(Color.RED);
-        particle.setBounds(posX-5*particle_size,posY-5*particle_size,posX+5*particle_size,posY+5*particle_size);
-        particle.draw(canvas);
-        Log.d(TAG, "Specified particle created: ");
-        Log.d(TAG, String.valueOf(posX));
-        Log.d(TAG, String.valueOf(posY));
+    public int getX(){
+        return this.posX;
     }
 
-//    public void applyMotionModel(double orientation, double distance, double variance){
-//
-//    }
+    public int getY(){
+        return this.posY;
+    }
+
+    /**
+     *  assign a particle given x and y positions
+     */
+
+    public void defineParticlePosition(int posX, int posY, boolean bigRedDot){
+
+        // update this particle's position
+        this.posX = posX;
+        this.posY = posY;
+
+        // create particle shape
+        particle = new ShapeDrawable(new OvalShape());
+
+        // if this particle should be a big red dot (current location) or a normal blue dot (normal particle)
+        if (bigRedDot){
+            particle.getPaint().setColor(Color.RED);
+            particle.setBounds(posX - 5 * particle_size, posY - 5 * particle_size, posX + 5 * particle_size, posY + 5 * particle_size);
+        } else {
+            particle.getPaint().setColor(Color.BLUE);
+            particle.setBounds(posX - particle_size, posY -  particle_size, posX +  particle_size, posY + particle_size);
+        }
+    }
 
     /**
      * draw particle on a random position
      */
-    public void drawRandomPosition(){
 
-        //calculate width
+    public void assignRandomPosition(){
+
+        // randomize position
         int randX = ThreadLocalRandom.current().nextInt(0, screen_width - (particle_size/2));
         int randY = ThreadLocalRandom.current().nextInt(0, screen_height - (particle_size / 2));
 
+        // update this particle's position
+        this.posX = randX;
+        this.posY = randY;
+
+        // create shape and color properties
         particle = new ShapeDrawable(new OvalShape());
-        particle.getPaint().setColor(Color.BLUE);
+        particle.getPaint().setColor(Color.GREEN);
         particle.setBounds(randX-particle_size, randY-particle_size, randX+particle_size, randY+particle_size);
-        particle.draw(canvas);
     }
 
     /**

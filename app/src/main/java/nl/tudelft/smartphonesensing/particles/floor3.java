@@ -32,7 +32,7 @@ public class floor3 {
     private int screenWidth;
     private int screenHeight;
     private int floorWidthInCm = 14400;
-    private int floorHeightInCm = 33800;
+    private int floorHeightInCm = 26000;
 
     public floor3(int width, int height){
         this.screenWidth = width;
