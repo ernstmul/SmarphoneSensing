@@ -9,7 +9,7 @@
         <item>6 - hallway</item>
         <item>7 - E4.180</item>
         <item>8 - hallway</item>
-        <item>9 - hallway</item>
+        <item>9 - Marco's Office</item>
         <item>10 - hallway</item>
         <item>11 - hallway</item>
         <item>12 - hallway</item>
@@ -18,8 +18,8 @@
         <item>15 - hallway</item>
         <item>16 - staircase</item>
         <item>17 - staircase</item>
-        <item>18 - ?</item>
-        <item>19 - ?</item>
-        <item>20 - ?</item>
+        <item>18 - dustbin room</item>
+        <item>19 - not used</item>
+        <item>20 - PhD room</item>
     </string-array>
 </resources>

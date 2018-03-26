@@ -221,12 +221,12 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         int distanceWalked = 25; // TODO need to convert to meter distance using height and width - remember to account for orientation angle with different aspect ratio
 
         // orientation in degrees clockwise of North i.e. 45 = NE movement, 90 = E movement
-        // Note -  NORTH points DOWNWARDS on map - TODO need to account for actual NORTH when implementing with compass
+        // Note -  NORTH points DOWNWARDS on map - TODO need to account for actual NORTH ito MAP when implementing with compass
         int orientationWalked = 0;
 
         // variance of orientation and distance
         int distanceVariance = 5; // 5 pixel variance
-        int orientationVariance = 10; // 45 degrees orientation variance
+        int orientationVariance = 5; // 45 degrees orientation variance
 
         // move current location (big red particle)
         switch (v.getId()) {
@@ -269,115 +269,84 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             }
         }
 
-        /*
-         * Apply motion model to all particles
-         */
-
         // make sure we haven't pressed reset - otherwise we do not apply motion model
         if (!reset){
 
-            // 1 = x, 2 = y position of original particles
-            // this matrix contains the original x and y positions of the particles
-            //
-            // this is necessary because the for loop below updates particle locations, meaning we
-            // cannot access their original locations as they have been changed
-            int[][] originalParticleLocationMatrix = new int[2][particlesAmount];
-            for (int particleIdx = 0; particleIdx < particlesAmount; particleIdx++){
-                Particle currentParticle = particlesList.get(particleIdx);
-                originalParticleLocationMatrix[0][particleIdx] = currentParticle.getX();
-                originalParticleLocationMatrix[1][particleIdx] = currentParticle.getY();
-            }
-
             // init distance and orientation variables which include noise
-            int noisyDistanceWalked = 0;
-            double noisyOrientationWalked = 0;
+            int noisyDistanceWalked;
+            double noisyOrientationWalked;
 
             // loop through particle list to apply motion model
             for (int particleIdx = 0; particleIdx < particlesAmount; particleIdx++){
 
-                //Log.d(TAG, "--------------------------");
-                //Log.d(TAG, "current particle index: " + String.valueOf(particleIdx));
-
+                // currentParticle is the particle at its current location (no motion applied yet)
                 Particle currentParticle = particlesList.get(particleIdx);
                 int initX = currentParticle.getX();
                 int initY = currentParticle.getY();
-                //Log.d(TAG, "current particle x and y: " + String.valueOf(initX) + ", " + String.valueOf(initY));
 
-                // create random variables
+                // create random variables and define (Gaussian) noisy distance and orientation (based on variances defined at OnClick)
                 Random distanceRandom = new Random();
                 Random orientationRandom = new Random();
-
-                // add noise to orientation and distance walked variance (Gaussian distribution)
                 noisyDistanceWalked = distanceWalked + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
                 noisyOrientationWalked = (double) orientationWalked + orientationRandom.nextGaussian()*orientationVariance;
 
-                Particle newCurrentParticle = new Particle(canvas,width,height);
+                // create new Particle which represents moved particle position
+                Particle movedParticle = new Particle(canvas,width,height);
+
+                // find new x and y coordinates of moved particle and define the movedParticle
+                int moveX = - (int) Math.round(noisyDistanceWalked*Math.sin(Math.toRadians(noisyOrientationWalked)));
+                int moveY = (int) Math.round(noisyDistanceWalked*Math.cos(Math.toRadians(noisyOrientationWalked)));
+                int newX = initX + moveX;
+                int newY = initY + moveY;
+
+                movedParticle.defineParticlePosition(newX, newY, false);
+
+                /**
+                 *  Summary - we have:
+                 *  currentParticle - represents original particle position
+                 *  movedParticle - represents original particle moved with motion model
+                 */
+
+                // if movedParticle and trajectory from currentParticle violates obstacle boundaries,
+                // define new currentParticle based on random other particle in particlesList
 
                 // first try current particle and apply motion model
                 int randomParticleIdx = particleIdx;
 
-                int newX = 0;
-                int newY = 0;
-
-                // stop stuck while loop
+                // stop stuck while loop in case it gets stuck (typical when particleCount is small)
                 int counter = 0;
 
-                while((isCollision(newCurrentParticle) || isInClosedArea(newCurrentParticle)) && counter<5){
+                while((isCollision(movedParticle) || isInClosedArea(movedParticle) || isCollisionTrajectory(movedParticle, currentParticle)) && counter<50){
 
-                    counter++;
-                    //Log.d(TAG, "counter of while: " + String.valueOf(counter));
-
-                    newCurrentParticle.defineParticlePosition(initX, initY, false);
-
-                    //Log.d(TAG, "Init values: " + String.valueOf(initX) + ", " + String.valueOf(initY));
-                    //Log.d(TAG, String.valueOf(counter));
-
-                    // apply motion model
-                    newX = initX - (int) Math.round(noisyDistanceWalked*Math.sin(Math.toRadians(noisyOrientationWalked)));
-                    newY = initY + (int) Math.round(noisyDistanceWalked*Math.cos(Math.toRadians(noisyOrientationWalked)));
-
-                    newCurrentParticle.defineParticlePosition(newX, newY,false);
-
-                    // create new randomParticleIdx and apply motion model
+                    // redefine current particle and moved particle from random index in particlesList
                     randomParticleIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
-                    //Log.d(TAG, "randomParticleIdx: " + String.valueOf(randomParticleIdx));
+                    currentParticle = particlesList.get(randomParticleIdx);
 
-                    // get x and y coordinates of this new randomParticleIdx
-                    initX = originalParticleLocationMatrix[0][randomParticleIdx];
-                    initY = originalParticleLocationMatrix[1][randomParticleIdx];
+                    // apply motion model to this particle
+                    initX = currentParticle.getX();
+                    initY = currentParticle.getY();
+                    newX = initX + moveX;
+                    newY = initY + moveY;
+                    movedParticle.defineParticlePosition(newX, newY,false);
 
-                    //Log.d(TAG, "newCurrentParticle x and y: " + String.valueOf(newCurrentParticle.getCurrentX()) + ", " + String.valueOf(newCurrentParticle.getCurrentY()));
-                    //Particle fromParticleList = particlesList.get(particleIdx);
-                    //Log.d(TAG, "particleList x and y: " + String.valueOf(fromParticleList.getCurrentX()) + ", " + String.valueOf(fromParticleList.getCurrentY()));
-
-                    //Log.d(TAG, "newCurrentParticle: ");
-
-                    //Log.d(TAG, "isCollision: " + Boolean.valueOf(isCollision(newCurrentParticle)));
-                    //Log.d(TAG, "isInClosedArea: " + Boolean.valueOf(isInClosedArea(newCurrentParticle)));
-
-                    //Log.d(TAG, "CurrentParticle: ");
-
-                    //Log.d(TAG, "isCollision: " + Boolean.valueOf(isCollision(currentParticle)));
-                    //Log.d(TAG, "isInClosedArea: " + Boolean.valueOf(isInClosedArea(currentParticle)));
-
-                    //Log.d(TAG,"** end of while loop iteration **");
+                    // increase counter
+                    counter++;
                 }
 
-                // redefine particle with particle parameters that are within bounds
-                // as determined within the while-loop
-                currentParticle.defineParticlePosition(newX,newY,false);
-
                 // update particleList
-                particlesList.set(particleIdx,currentParticle);
+                particlesList.set(particleIdx,movedParticle);
 
+            }
 
+            /***
+             * Refactor particles
+             *
+             * This means re-assigning random particles to random map positions
+             *
+             * The idea is to allow for alternative particle positions in case all particles converge
+             * to the wrong location
+              */
 
-            } // end of loop going through particles
-
-            // refactor particles
-            // this means re-assigning random particles to random map positions
-            // the idea is to allow for alternative particle positions in case all particles converge
-            // to the wrong location
 
             for (int refactorIdx = 0; refactorIdx < refactorParticlesAmount; refactorIdx++){
 
@@ -391,18 +360,11 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                     newRandomParticle.assignRandomPosition();
                 }
 
-                //newRandomParticle.drawRandomPosition();
-
-                // add this new particle to the particlesList
+                // replace current particle at randomIdx with this new, random, refactored particle
                 particlesList.set(randomIdx,newRandomParticle);
-
-                // update array of previous positions
-                originalParticleLocationMatrix[0][randomIdx] = newRandomParticle.getX();
-                originalParticleLocationMatrix[1][randomIdx] = newRandomParticle.getY();
-
             }
 
-        } // end if reset statement
+        }
 
         // TODO - add functionality for reset button if deemed necessary
 
@@ -423,6 +385,65 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 return true;
             }
 
+        }
+        return false;
+    }
+
+    /**
+     * Determines if the trajectory between a particle's old and new position intersects with a wall
+     * or obstacle area
+     *
+     * @param newPosition - position of particle at new position
+     * @param oldPosition - position of particle at original position
+     * @return True if the rectangle spanning the old and new particle position intersect with a wall
+     */
+
+    private boolean isCollisionTrajectory(Particle newPosition, Particle oldPosition){
+        int newX = newPosition.getX();
+        int newY = newPosition.getY();
+
+        int oldX = oldPosition.getX();
+        int oldY = oldPosition.getY();
+
+        int left, right, top, bottom;
+
+        // check x values
+        if (newX <= oldX){
+            left = newX;
+            right = oldX;
+        } else { //if (newX > oldX)
+            left = oldX;
+            right = newX;
+        } /*else {
+            // if equal, add extra width to ensure rect does not have 0 area
+            // TODO - possibly not necessary?
+            left = newX;
+            right = oldX + 1;
+        }*/
+
+        // check y values
+        if (newY <= oldY){
+            top = newY;
+            bottom = oldY;
+        } else { // if (newY > oldY)
+            top = oldY;
+            bottom = newY;
+        } /*else {
+            // if equal, add extra height to ensure rect does not have 0 area
+            // TODO - possibly not necessary?
+            top = newY;
+            bottom = oldY + 1;
+        }*/
+
+        // create trajectory rectangle between two particles
+        Rect trajectoryRect = new Rect(left, top, right, bottom);
+
+        // check if this trajectory crosses any walls
+        for(ShapeDrawable wall : walls) {
+            if (trajectoryRect.intersect(wall.getBounds())){
+                // trajectory rectangle does intersect with a wall - collision = true
+                return true;
+            }
         }
         return false;
     }
