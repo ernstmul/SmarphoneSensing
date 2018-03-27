@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import nl.tudelft.smartphonesensing.R;
+import nl.tudelft.smartphonesensing.particles.ParticlesActivity;
 
 import static android.content.Context.SENSOR_SERVICE;
 
@@ -18,7 +19,7 @@ import static android.content.Context.SENSOR_SERVICE;
  * Created by ernstmulders on 11/03/2018.
  */
 
-public class Compass implements SensorEventListener{
+public class Compass extends ParticlesActivity implements SensorEventListener{
     private static String TAG = "Compass";
 
     private Context context;
@@ -36,7 +37,7 @@ public class Compass implements SensorEventListener{
     private Button up;
     private Button down;
 
-    String heading;
+    public String heading;
 
     /**
      * Initialize the compass
@@ -155,7 +156,7 @@ public class Compass implements SensorEventListener{
             up.setBackgroundColor(context.getResources().getColor(R.color.colorAccent));
         }
 
-
+        ParticlesActivity.heading = heading;
     }
 
 

@@ -8,6 +8,10 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -34,46 +38,49 @@ import nl.tudelft.smartphonesensing.utils.sensors.Steps;
  * Created by ernstmulders on 23/03/2018.
  */
 
-public class ParticlesActivity extends AppCompatActivity implements View.OnClickListener {
+public class ParticlesActivity extends AppCompatActivity implements View.OnClickListener, SensorEventListener {
 
     private static String TAG = "ParticlesActivity";
 
     //configuration
-    private static Integer particlesAmount = 1000;
+    private static Integer particlesAmount = 100;
 
     // number of particles to refactor:
     // must be less than particlesAmount
     private static int refactorParticlesAmount = 5;
     private static Boolean shouldDrawClosedAreas = false;
 
-    private Canvas canvas;
-    private List<ShapeDrawable> walls;
-    private List<ShapeDrawable> closed_areas;
-    private List<Particle> particlesList;
+    private static Canvas canvas;
+    private static List<ShapeDrawable> walls;
+    private static List<ShapeDrawable> closed_areas;
+    private static List<Particle> particlesList;
     //private List<Particle> particlesOriginalList;
-    private Particle currentLocation;
+    private static Particle currentLocation;
 
     //define sensors
-    private Compass compass;
-    private Steps steps;
+    private static Compass compass;
+    private static Steps steps;
 
     // define buttons
-    private Button up,left,right,down,reset;
+    private static Button up,left,right,down,reset;
+
+    public static String heading = "";
 
     // define textview for button pressed and reset status
-    private TextView textStatus;
+    private static TextView textStatus;
 
     // manual location (Big red dot) original location on map
-    private int originalLocationX = 500;
-    private int originalLocationY = 220;
+    private static int originalLocationX = 500;
+    private static int originalLocationY = 220;
 
     // big red dot's current location
-    private int actualLocationX = originalLocationX;
-    private int actualLocationY = originalLocationY;
+    private static int actualLocationX = originalLocationX;
+    private static int actualLocationY = originalLocationY;
 
+    private static int floor;
 
-    //how much centimeter is one step
-    private int stepSize = 74;
+    //how much millimeters is one step
+    private static int stepSize = 740;
 
     // floor 3 dimensions in millimeters
     private int floor3Width = 14400;
@@ -83,18 +90,24 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     private int floor4Width = 14400;
     private int floor4Height = 26000;
 
+    private SensorManager mSensorManager;
+
+    private static int screen_width = 0;
+    private static int screen_height = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_particles);
 
-        // get the screen dimensions
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        int width = size.x;
-        int height = size.y;
+        screen_width = size.x;
+        screen_height = size.y;
+
+        Bundle bundle = getIntent().getExtras();
+        floor = bundle.getInt("floor");
 
         // define or set buttons
         up = (Button) findViewById(R.id.buttonUp);
@@ -110,6 +123,11 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         steps = new Steps(getApplicationContext(), null, false);
 
+        //listen to steps
+        mSensorManager = (SensorManager) getApplicationContext().getSystemService(SENSOR_SERVICE);
+        //and listen to changes
+        Sensor pS = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+        mSensorManager.registerListener(this, pS, SensorManager.SENSOR_DELAY_GAME);
 
         // set listeners on buttons
         up.setOnClickListener(this);
@@ -123,23 +141,21 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         // create a canvas
         ImageView canvasView = (ImageView) findViewById(R.id.canvas);
-        Bitmap blankBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
+        Bitmap blankBitmap = Bitmap.createBitmap(screen_width,screen_height, Bitmap.Config.ARGB_8888);
         canvas = new Canvas(blankBitmap);
         canvasView.setImageBitmap(blankBitmap);
 
         //determine the floor
-        Bundle bundle = getIntent().getExtras();
-        Integer floor = bundle.getInt("floor");
 
         if(floor == 3){
-            floor3 floor3 = new floor3(width,height,floor3Width,floor3Height);
-            walls = floor3.getWalls(width, height);
-            closed_areas = floor3.getClosedAreas(width, height);
+            floor3 floor3 = new floor3(screen_width,screen_height,floor3Width,floor3Height);
+            walls = floor3.getWalls(screen_width, screen_height);
+            closed_areas = floor3.getClosedAreas(screen_width, screen_height);
         }
         else{
-            floor4 floor4 = new floor4(width,height);
-            walls = floor4.getWalls(width, height);
-            closed_areas = floor4.getClosedAreas(width, height);
+            floor4 floor4 = new floor4(screen_width,screen_height);
+            walls = floor4.getWalls(screen_width, screen_height);
+            closed_areas = floor4.getClosedAreas(screen_width, screen_height);
         }
 
         Log.d(TAG, "closed area count: " + closed_areas.size());
@@ -159,7 +175,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         particlesList = new ArrayList<>();
         for(Integer particleCount = 0; particleCount < particlesAmount; particleCount++){
             // generate a new particle
-            Particle particle = new Particle(canvas, width, height);
+            Particle particle = new Particle(canvas, screen_width, screen_height);
 
             // place particle at random position within bounds
             while(isCollision(particle) || isInClosedArea(particle)){
@@ -171,7 +187,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         }
 
         // Create particle showing current location
-        currentLocation = new Particle(canvas, width, height);
+        currentLocation = new Particle(canvas, screen_width, screen_height);
         textStatus.setText("Start");
         actualLocationX = originalLocationX;
         actualLocationY = originalLocationY;
@@ -231,59 +247,47 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     public void onClick(View v){
         Log.d(TAG, "button pressed: red dot moved");
 
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int screenwidth = size.x;
-        int screenheight = size.y;
-
         // check if reset is performed, if so, do not use motion model
         boolean reset = false;
 
-        Log.d(TAG, "height = " + String.valueOf(screenheight));
-        Log.d(TAG, "width = " + String.valueOf(screenwidth));
+        Log.d(TAG, "height = " + String.valueOf(screen_height));
+        Log.d(TAG, "width = " + String.valueOf(screen_width));
 
 
-        // distance walked in millimeters
-        int distanceWalkedMillimeters = 500;
+
 
         //int distanceWalked = distanceWalkedMillimeters*screenwidth/floor4Width;
-
-        int orientationWalked = 0;
-
-        // variance of orientation and distance
-        int distanceVariance = 5; // 5 pixel variance
-        int orientationVariance = 5; // 45 degrees orientation variance
-
+        int distanceWalkedMillimeters = 500;
         int orientationWalkedDegrees = 0;
+
 
         // move current location (big red particle)
         switch (v.getId()) {
             case R.id.buttonUp:{
                 textStatus.setText("Up");
 
-                actualLocationY = actualLocationY - distanceWalkedMillimeters*screenheight/floor3Height;
+                actualLocationY = actualLocationY - distanceWalkedMillimeters*screen_height/floor3Height;
                 orientationWalkedDegrees = 180;
                 currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
                 break;
             }
             case R.id.buttonDown:{
                 textStatus.setText("Down");
-                actualLocationY = actualLocationY + distanceWalkedMillimeters*screenheight/floor3Height;
+                actualLocationY = actualLocationY + distanceWalkedMillimeters*screen_height/floor3Height;
                 orientationWalkedDegrees = 0;
                 currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
                 break;
             }
             case R.id.buttonLeft:{
                 textStatus.setText("Left");
-                actualLocationX = actualLocationX - distanceWalkedMillimeters*screenwidth/floor3Width;
+                actualLocationX = actualLocationX - distanceWalkedMillimeters*screen_width/floor3Width;
                 orientationWalkedDegrees = 270;
                 currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
                 break;
             }
             case R.id.buttonRight:{
                 textStatus.setText("Right");
-                actualLocationX = actualLocationX + distanceWalkedMillimeters*screenwidth/floor3Width;
+                actualLocationX = actualLocationX + distanceWalkedMillimeters*screen_width/floor3Width;
                 orientationWalkedDegrees = 90;
                 currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
                 break;
@@ -312,15 +316,13 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         int distanceWalkedPixelsX;
         int distanceWalkedPixelsY;
 
-        Bundle bundle = getIntent().getExtras();
-        Integer floor = bundle.getInt("floor");
         if(floor == 3){
-            distanceWalkedPixelsX = distanceWalkedMillimetersX*screenwidth/floor3Width;
-            distanceWalkedPixelsY = distanceWalkedMillimetersY*screenheight/floor3Height;
+            distanceWalkedPixelsX = distanceWalkedMillimetersX*screen_width/floor3Width;
+            distanceWalkedPixelsY = distanceWalkedMillimetersY*screen_height/floor3Height;
         }
         else{
-            distanceWalkedPixelsX = distanceWalkedMillimetersX*screenwidth/floor4Width;
-            distanceWalkedPixelsY = distanceWalkedMillimetersY*screenheight/floor4Height;
+            distanceWalkedPixelsX = distanceWalkedMillimetersX*screen_width/floor4Width;
+            distanceWalkedPixelsY = distanceWalkedMillimetersY*screen_height/floor4Height;
         }
 
         // distance walked in pixel distances
@@ -332,121 +334,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         // make sure we haven't pressed reset - otherwise we do not apply motion model
         if (!reset) {
 
-
-            // init distance and orientation variables which include noise
-            int noisyDistanceWalkedMillimeters;
-            double noisyOrientationWalkedDegrees;
-
-            int noisyDistanceWalkedPixelsX;
-            int noisyDistanceWalkedPixelsY;
-
-            // loop through particle list to apply motion model
-            for (int particleIdx = 0; particleIdx < particlesAmount; particleIdx++) {
-
-                // currentParticle is the particle at its current location (no motion applied yet)
-                Particle currentParticle = particlesList.get(particleIdx);
-                int initX = currentParticle.getX();
-                int initY = currentParticle.getY();
-
-                // create random variables and define (Gaussian) noisy distance and orientation (based on variances defined at OnClick)
-                Random distanceRandom = new Random();
-                Random orientationRandom = new Random();
-
-                // create distance
-                noisyDistanceWalkedMillimeters = distanceWalkedMillimeters + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
-                noisyOrientationWalkedDegrees = (double) orientationWalkedDegrees + orientationRandom.nextGaussian()*orientationVariance;
-
-                int noisyDistanceWalkedMillimetersX = (int) Math.round(noisyDistanceWalkedMillimeters*Math.sin(Math.toRadians(noisyOrientationWalkedDegrees)));
-                int noisyDistanceWalkedMillimetersY = (int) Math.round(noisyDistanceWalkedMillimeters*Math.cos(Math.toRadians(noisyOrientationWalkedDegrees)));
-
-                if(floor == 3){
-                    noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX*screenwidth/floor3Width;
-                    noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY*screenheight/floor3Height;
-                }
-                else{
-                    noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX*screenwidth/floor4Width;
-                    noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY*screenheight/floor4Height;
-                }
-
-                        //int noisyDistanceWalkedPixlesY = distanceWalkedPixelsY + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
-
-                //noisyDistanceWalked = distanceWalked + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
-
-                // noisyOrientationWalkedDegrees = (double) orientationWalkedDegrees + orientationRandom.nextGaussian()*orientationVariance;
-
-                // create new Particle which represents moved particle position
-                Particle movedParticle = new Particle(canvas,screenwidth,screenheight);
-
-                // find new x and y coordinates of moved particle and define the movedParticle
-                //int moveX = - (int) Math.round(noisyDistanceWalked*Math.sin(Math.toRadians(noisyOrientationWalked)));
-                //int moveY = (int) Math.round(noisyDistanceWalked*Math.cos(Math.toRadians(noisyOrientationWalked)));
-                int newX = initX + noisyDistanceWalkedPixelsX;
-                int newY = initY + noisyDistanceWalkedPixelsY;
-
-                movedParticle.defineParticlePosition(newX, newY, false);
-
-                /**
-                 *  Summary - we have:
-                 *  currentParticle - represents original particle position
-                 *  movedParticle - represents original particle moved with motion model
-                 */
-
-                // if movedParticle and trajectory from currentParticle violates obstacle boundaries,
-                // define new currentParticle based on random other particle in particlesList
-
-                // first try current particle and apply motion model
-                int randomParticleIdx = particleIdx;
-
-                // stop stuck while loop in case it gets stuck (typical when particleCount is small)
-                int counter = 0;
-
-                while((isCollision(movedParticle) || isInClosedArea(movedParticle) || isCollisionTrajectory(movedParticle, currentParticle)) && counter<50){
-
-                    // redefine current particle and moved particle from random index in particlesList
-                    randomParticleIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
-                    currentParticle = particlesList.get(randomParticleIdx);
-
-                    // apply motion model to this particle
-                    initX = currentParticle.getX();
-                    initY = currentParticle.getY();
-                    newX = initX + noisyDistanceWalkedPixelsX;
-                    newY = initY + noisyDistanceWalkedPixelsY;
-                    movedParticle.defineParticlePosition(newX, newY,false);
-
-                    // increase counter
-                    counter++;
-                }
-
-                // update particleList
-                particlesList.set(particleIdx,movedParticle);
-
-            }
-
-            /***
-             * Refactor particles
-             *
-             * This means re-assigning random particles to random map positions
-             *
-             * The idea is to allow for alternative particle positions in case all particles converge
-             * to the wrong location
-             */
-
-
-            for (int refactorIdx = 0; refactorIdx < refactorParticlesAmount; refactorIdx++){
-
-                // get random index within particle amount
-                int randomIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
-
-                // update new particles
-                Particle newRandomParticle = new Particle(canvas,screenwidth,screenheight);
-
-                while(isCollision(newRandomParticle) || isInClosedArea(newRandomParticle)){
-                    newRandomParticle.assignRandomPosition();
-                }
-
-                // replace current particle at randomIdx with this new, random, refactored particle
-                particlesList.set(randomIdx,newRandomParticle);
-            }
+            calculateParticlesPosition(distanceWalkedMillimeters,orientationWalkedDegrees );
 
         }
 
@@ -457,9 +345,129 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
     }
 
-    private void calculateParticlesPosition(){
+    private void calculateParticlesPosition(int distanceWalkedMillimeters, int orientationWalkedDegrees){
 
 
+
+
+        // variance of orientation and distance
+        int distanceVariance = 5; // 5 pixel variance
+        int orientationVariance = 5; // 45 degrees orientation variance
+
+        // init distance and orientation variables which include noise
+        int noisyDistanceWalkedMillimeters;
+        double noisyOrientationWalkedDegrees;
+
+        int noisyDistanceWalkedPixelsX;
+        int noisyDistanceWalkedPixelsY;
+
+        // loop through particle list to apply motion model
+        for (int particleIdx = 0; particleIdx < particlesAmount; particleIdx++) {
+
+            // currentParticle is the particle at its current location (no motion applied yet)
+            Particle currentParticle = particlesList.get(particleIdx);
+            int initX = currentParticle.getX();
+            int initY = currentParticle.getY();
+
+            // create random variables and define (Gaussian) noisy distance and orientation (based on variances defined at OnClick)
+            Random distanceRandom = new Random();
+            Random orientationRandom = new Random();
+
+            // create distance
+            noisyDistanceWalkedMillimeters = distanceWalkedMillimeters + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
+            noisyOrientationWalkedDegrees = (double) orientationWalkedDegrees + orientationRandom.nextGaussian()*orientationVariance;
+
+            int noisyDistanceWalkedMillimetersX = (int) Math.round(noisyDistanceWalkedMillimeters*Math.sin(Math.toRadians(noisyOrientationWalkedDegrees)));
+            int noisyDistanceWalkedMillimetersY = (int) Math.round(noisyDistanceWalkedMillimeters*Math.cos(Math.toRadians(noisyOrientationWalkedDegrees)));
+
+            if(floor == 3){
+                noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX*screen_width/floor3Width;
+                noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY*screen_height/floor3Height;
+            }
+            else{
+                noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX*screen_width/floor4Width;
+                noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY*screen_height/floor4Height;
+            }
+
+            //int noisyDistanceWalkedPixlesY = distanceWalkedPixelsY + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
+
+            //noisyDistanceWalked = distanceWalked + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
+
+            // noisyOrientationWalkedDegrees = (double) orientationWalkedDegrees + orientationRandom.nextGaussian()*orientationVariance;
+
+            // create new Particle which represents moved particle position
+            Particle movedParticle = new Particle(canvas,screen_width,screen_height);
+
+            // find new x and y coordinates of moved particle and define the movedParticle
+            //int moveX = - (int) Math.round(noisyDistanceWalked*Math.sin(Math.toRadians(noisyOrientationWalked)));
+            //int moveY = (int) Math.round(noisyDistanceWalked*Math.cos(Math.toRadians(noisyOrientationWalked)));
+            int newX = initX + noisyDistanceWalkedPixelsX;
+            int newY = initY + noisyDistanceWalkedPixelsY;
+
+            movedParticle.defineParticlePosition(newX, newY, false);
+
+            /**
+             *  Summary - we have:
+             *  currentParticle - represents original particle position
+             *  movedParticle - represents original particle moved with motion model
+             */
+
+            // if movedParticle and trajectory from currentParticle violates obstacle boundaries,
+            // define new currentParticle based on random other particle in particlesList
+
+            // first try current particle and apply motion model
+            int randomParticleIdx = particleIdx;
+
+            // stop stuck while loop in case it gets stuck (typical when particleCount is small)
+            int counter = 0;
+
+            while((isCollision(movedParticle) || isInClosedArea(movedParticle) || isCollisionTrajectory(movedParticle, currentParticle)) && counter<50){
+
+                // redefine current particle and moved particle from random index in particlesList
+                randomParticleIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
+                currentParticle = particlesList.get(randomParticleIdx);
+
+                // apply motion model to this particle
+                initX = currentParticle.getX();
+                initY = currentParticle.getY();
+                newX = initX + noisyDistanceWalkedPixelsX;
+                newY = initY + noisyDistanceWalkedPixelsY;
+                movedParticle.defineParticlePosition(newX, newY,false);
+
+                // increase counter
+                counter++;
+            }
+
+            // update particleList
+            particlesList.set(particleIdx,movedParticle);
+
+        }
+
+        /***
+         * Refactor particles
+         *
+         * This means re-assigning random particles to random map positions
+         *
+         * The idea is to allow for alternative particle positions in case all particles converge
+         * to the wrong location
+         */
+
+
+        for (int refactorIdx = 0; refactorIdx < refactorParticlesAmount; refactorIdx++){
+
+            // get random index within particle amount
+            int randomIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
+
+            // update new particles
+            Particle newRandomParticle = new Particle(canvas,screen_width,screen_height);
+
+            while(isCollision(newRandomParticle) || isInClosedArea(newRandomParticle)){
+                newRandomParticle.assignRandomPosition();
+            }
+
+            // replace current particle at randomIdx with this new, random, refactored particle
+            particlesList.set(randomIdx,newRandomParticle);
+        }
     }
 
     /**
@@ -467,6 +475,28 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
      */
     public void walkingDetected(){
         Log.d(TAG, "I've made a step");
+         int distanceWalkedMillimeters = 1 * stepSize;   //1 = because the function is called for every step
+
+        String direction = heading;
+        Log.d(TAG, "heading:" + heading + ";");
+        int directionInt = 0;
+
+        switch(direction){
+            case "up":
+                directionInt = 180;
+                break;
+            case "right":
+                directionInt = 90;
+                break;
+            case "down":
+                directionInt = 0;
+                break;
+            case "left":
+                directionInt = 270;
+        }
+
+        //make the calculations
+        calculateParticlesPosition(distanceWalkedMillimeters,directionInt);
 
     }
 
@@ -555,5 +585,17 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     private boolean isShapeCollision(ShapeDrawable first, ShapeDrawable second) {
         Rect firstRect = new Rect(first.getBounds());
         return firstRect.intersect(second.getBounds());
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+            walkingDetected();
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
     }
 }
