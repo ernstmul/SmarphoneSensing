@@ -31,9 +31,18 @@ public class floor3 {
      */
     private int screenWidth;
     private int screenHeight;
+    // default values, can be changed
     private int floorWidthInCm = 14400;
     private int floorHeightInCm = 26000;
 
+    public floor3(int width, int height, int floorWidthInCm, int floorHeightInCm){
+        this.screenWidth = width;
+        this.screenHeight = height;
+        this.floorWidthInCm = floorWidthInCm;
+        this.floorHeightInCm = floorHeightInCm;
+    }
+
+    // alternative constructor
     public floor3(int width, int height){
         this.screenWidth = width;
         this.screenHeight = height;
@@ -42,7 +51,24 @@ public class floor3 {
     public List getClosedAreas(int width, int height){
         closed_areas = new ArrayList<>();
 
-        //toto add closed areas 3rd floor
+        closed_areas.add(functionDimensionsToClosedArea(0,0,5200,18200));
+
+        closed_areas.add(functionDimensionsToClosedArea(0,18200,2100,18200+3400));
+
+        closed_areas.add(functionDimensionsToClosedArea(0,18200+3400,9400,26000));
+
+        // island part 2
+
+        closed_areas.add(functionDimensionsToClosedArea(7500,13800,13100,18200));
+        closed_areas.add(functionDimensionsToClosedArea(7500,12400,11700,13800));
+
+        // island part 1
+        closed_areas.add(functionDimensionsToClosedArea(10800,0,14400,4400));
+        closed_areas.add(functionDimensionsToClosedArea(7500,1800,10800,4400));
+        closed_areas.add(functionDimensionsToClosedArea(7500,4400,9300,5800));
+        closed_areas.add(functionDimensionsToClosedArea(7500,5800,11700,8000));
+
+
 
         return closed_areas;
     }
@@ -227,35 +253,42 @@ public class floor3 {
         return d;
     }
 
+//    /**
+//     *
+//     * @param cmFromLeft distance from left floor bound in cm
+//     * @param cmFromTop distance from top floor bound in cm
+//     * @param sizeInCm length of the wall in cm
+//     * @param isHorizontal if its a vertical wall or horizontal line
+//     * IMPORTANT: the floorplan is 90degrees turned to fit the landscape plan on a portrait screen
+//     * @return
+//     */
+
     /**
      *
-     * @param cmFromLeft distance from left floor bound in cm
-     * @param cmFromTop distance from top floor bound in cm
-     * @param sizeInCm length of the wall in cm
-     * @param isHorizontal if its a vertical wall or horizontal line
+     * @param left_input distance from left floor bound in cm
+     * @param top_input distance from top floor bound in cm
+     * @param right_input distance from left floor bound in cm
+     * @param bottom_input distance from top floor bound in cm
      * IMPORTANT: the floorplan is 90degrees turned to fit the landscape plan on a portrait screen
      * @return
      */
 
-
-    private ShapeDrawable functionDimensionsToClosedArea(int cmFromLeft, int cmFromTop, int sizeInCm, boolean isHorizontal){
+    private ShapeDrawable functionDimensionsToClosedArea(int left_input, int top_input, int right_input, int bottom_input){
         ShapeDrawable d = new ShapeDrawable(new RectShape());
         d.getPaint().setColor(Color.RED);
 
         //correct cmFromLeft and cmFromTop for line thinkness
-        int cmFromLeftPixelWallThinknessCorrection = (cmFromLeft/this.floorWidthInCm)*10;
-        int cmFromTopPixelWallThinknessCorrection = (cmFromTop/this.floorHeightInCm)*10;
 
-        double partial = ((double)cmFromLeft/(double)this.floorWidthInCm);
+        int left = (int)(((double)left_input/(double)this.floorWidthInCm) * (double)this.screenWidth);
+        int top = (int) (((double)top_input/(double)this.floorHeightInCm) * (double)this.screenHeight);
+        int right = (int)(((double)right_input/(double)this.floorWidthInCm) * (double)this.screenWidth);
+        int bottom = (int) (((double)bottom_input/(double)this.floorHeightInCm) * (double)this.screenHeight);
 
-        int left = (int)(((double)cmFromLeft/(double)this.floorWidthInCm) * (double)this.screenWidth - (double)cmFromLeftPixelWallThinknessCorrection);
-        int top = (int) (((double)cmFromTop/(double)this.floorHeightInCm) * (double)this.screenHeight - (double)cmFromTopPixelWallThinknessCorrection);
-        int right = (int) ((isHorizontal) ? (((double)cmFromLeft+sizeInCm)/(double)this.floorWidthInCm) * (double)this.screenWidth : (((double)cmFromLeft/(double)this.floorWidthInCm) * (double)this.screenWidth + 10.0));
-        int bottom = (int)((!isHorizontal) ? (((double)cmFromTop+sizeInCm)/(double)this.floorHeightInCm) * (double)this.screenHeight : (((double)cmFromTop/(double)this.floorHeightInCm) * (double)this.screenHeight + 10.0));
+        Log.d(TAG, "left:" + left);
+        Log.d(TAG, "top: " + top);
+        Log.d(TAG, "right: " + right);
+        Log.d(TAG, "bottom: " + bottom);
 
-        Log.d(TAG, "partial:" + partial);
-        Log.d(TAG, "left:" + ((cmFromLeft/this.floorWidthInCm) * this.screenWidth));
-        Log.d(TAG, "Pixel draw left:" + left + " top:" + (cmFromTop/this.floorHeightInCm) * this.screenHeight + "right: " + ((isHorizontal) ? ((cmFromLeft+sizeInCm)/this.floorWidthInCm) * this.screenWidth : ((cmFromLeft/this.floorWidthInCm) * this.screenWidth + 20)) + " bottom:"+ ((!isHorizontal) ? ((cmFromTop+sizeInCm)/this.floorHeightInCm) * this.screenHeight : ((cmFromTop/this.floorHeightInCm) * this.screenHeight + 10)));
         d.setBounds(
                 left,
                 top,
@@ -265,4 +298,37 @@ public class floor3 {
 
         return d;
     }
+
+
+
+    /*
+     * Previous function - assume only tested, not necessary
+     */
+//    private ShapeDrawable functionDimensionsToClosedArea(int cmFromLeft, int cmFromTop, int sizeInCm, boolean isHorizontal){
+//        ShapeDrawable d = new ShapeDrawable(new RectShape());
+//        d.getPaint().setColor(Color.RED);
+//
+//        //correct cmFromLeft and cmFromTop for line thinkness
+//        int cmFromLeftPixelWallThinknessCorrection = (cmFromLeft/this.floorWidthInCm)*10;
+//        int cmFromTopPixelWallThinknessCorrection = (cmFromTop/this.floorHeightInCm)*10;
+//
+//        double partial = ((double)cmFromLeft/(double)this.floorWidthInCm);
+//
+//        int left = (int)(((double)cmFromLeft/(double)this.floorWidthInCm) * (double)this.screenWidth - (double)cmFromLeftPixelWallThinknessCorrection);
+//        int top = (int) (((double)cmFromTop/(double)this.floorHeightInCm) * (double)this.screenHeight - (double)cmFromTopPixelWallThinknessCorrection);
+//        int right = (int) ((isHorizontal) ? (((double)cmFromLeft+sizeInCm)/(double)this.floorWidthInCm) * (double)this.screenWidth : (((double)cmFromLeft/(double)this.floorWidthInCm) * (double)this.screenWidth + 10.0));
+//        int bottom = (int)((!isHorizontal) ? (((double)cmFromTop+sizeInCm)/(double)this.floorHeightInCm) * (double)this.screenHeight : (((double)cmFromTop/(double)this.floorHeightInCm) * (double)this.screenHeight + 10.0));
+//
+//        Log.d(TAG, "partial:" + partial);
+//        Log.d(TAG, "left:" + ((cmFromLeft/this.floorWidthInCm) * this.screenWidth));
+//        Log.d(TAG, "Pixel draw left:" + left + " top:" + (cmFromTop/this.floorHeightInCm) * this.screenHeight + "right: " + ((isHorizontal) ? ((cmFromLeft+sizeInCm)/this.floorWidthInCm) * this.screenWidth : ((cmFromLeft/this.floorWidthInCm) * this.screenWidth + 20)) + " bottom:"+ ((!isHorizontal) ? ((cmFromTop+sizeInCm)/this.floorHeightInCm) * this.screenHeight : ((cmFromTop/this.floorHeightInCm) * this.screenHeight + 10)));
+//        d.setBounds(
+//                left,
+//                top,
+//                right,
+//                bottom);
+//
+//
+//        return d;
+//    }
 }
