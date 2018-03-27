@@ -353,28 +353,29 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 Random orientationRandom = new Random();
 
                 // create distance
-                noisyDistanceWalkedMillimeters = distanceWalkedMillimeters + (int) Math.round(distanceRandom.nextGaussian() * distanceVariance);
-                noisyOrientationWalkedDegrees = (double) orientationWalkedDegrees + orientationRandom.nextGaussian() * orientationVariance;
+                noisyDistanceWalkedMillimeters = distanceWalkedMillimeters + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
+                noisyOrientationWalkedDegrees = (double) orientationWalkedDegrees + orientationRandom.nextGaussian()*orientationVariance;
 
-                int noisyDistanceWalkedMillimetersX = (int) Math.round(noisyDistanceWalkedMillimeters * Math.sin(Math.toRadians(noisyOrientationWalkedDegrees)));
-                int noisyDistanceWalkedMillimetersY = (int) Math.round(noisyDistanceWalkedMillimeters * Math.cos(Math.toRadians(noisyOrientationWalkedDegrees)));
+                int noisyDistanceWalkedMillimetersX = (int) Math.round(noisyDistanceWalkedMillimeters*Math.sin(Math.toRadians(noisyOrientationWalkedDegrees)));
+                int noisyDistanceWalkedMillimetersY = (int) Math.round(noisyDistanceWalkedMillimeters*Math.cos(Math.toRadians(noisyOrientationWalkedDegrees)));
 
-                if (floor == 3) {
-                    noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX * screenwidth / floor3Width;
-                    noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY * screenheight / floor3Height;
-                } else {
-                    noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX * screenwidth / floor4Width;
-                    noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY * screenheight / floor4Height;
+                if(floor == 3){
+                    noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX*screenwidth/floor3Width;
+                    noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY*screenheight/floor3Height;
+                }
+                else{
+                    noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX*screenwidth/floor4Width;
+                    noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY*screenheight/floor4Height;
                 }
 
-                //int noisyDistanceWalkedPixlesY = distanceWalkedPixelsY + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
+                        //int noisyDistanceWalkedPixlesY = distanceWalkedPixelsY + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
 
                 //noisyDistanceWalked = distanceWalked + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
 
                 // noisyOrientationWalkedDegrees = (double) orientationWalkedDegrees + orientationRandom.nextGaussian()*orientationVariance;
 
                 // create new Particle which represents moved particle position
-                Particle movedParticle = new Particle(canvas, screenwidth, screenheight);
+                Particle movedParticle = new Particle(canvas,screenwidth,screenheight);
 
                 // find new x and y coordinates of moved particle and define the movedParticle
                 //int moveX = - (int) Math.round(noisyDistanceWalked*Math.sin(Math.toRadians(noisyOrientationWalked)));
@@ -399,10 +400,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 // stop stuck while loop in case it gets stuck (typical when particleCount is small)
                 int counter = 0;
 
-                while ((isCollision(movedParticle) || isInClosedArea(movedParticle) || isCollisionTrajectory(movedParticle, currentParticle)) && counter < 50) {
+                while((isCollision(movedParticle) || isInClosedArea(movedParticle) || isCollisionTrajectory(movedParticle, currentParticle)) && counter<50){
 
                     // redefine current particle and moved particle from random index in particlesList
-                    randomParticleIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount - 1);
+                    randomParticleIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
                     currentParticle = particlesList.get(randomParticleIdx);
 
                     // apply motion model to this particle
@@ -410,13 +411,26 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                     initY = currentParticle.getY();
                     newX = initX + noisyDistanceWalkedPixelsX;
                     newY = initY + noisyDistanceWalkedPixelsY;
-                    movedParticle.defineParticlePosition(newX, newY, false);
+                    movedParticle.defineParticlePosition(newX, newY,false);
 
-                    //increase counter
+                    // increase counter
                     counter++;
                 }
-                particlesList.set(particleIdx, movedParticle);
+
+                // update particleList
+                particlesList.set(particleIdx,movedParticle);
+
             }
+
+            /***
+             * Refactor particles
+             *
+             * This means re-assigning random particles to random map positions
+             *
+             * The idea is to allow for alternative particle positions in case all particles converge
+             * to the wrong location
+             */
+
 
             for (int refactorIdx = 0; refactorIdx < refactorParticlesAmount; refactorIdx++){
 
@@ -433,11 +447,12 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 // replace current particle at randomIdx with this new, random, refactored particle
                 particlesList.set(randomIdx,newRandomParticle);
             }
+
         }
-            // TODO - add functionality for reset button if deemed necessary
 
+        // TODO - add functionality for reset button if deemed necessary
 
-            redraw();
+        redraw();
 
 
     }
