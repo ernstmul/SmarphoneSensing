@@ -129,7 +129,7 @@ public class Compass extends ParticlesActivity implements SensorEventListener{
         up.setBackgroundColor(0x00000000);
         down.setBackgroundColor(0x00000000);
 
-        Log.d(TAG, "before imageRotation: " + imageRotation);
+        //Log.d(TAG, "before imageRotation: " + imageRotation);
 
         //get the value between 0 and 360
         while(imageRotation < 0){
@@ -137,7 +137,7 @@ public class Compass extends ParticlesActivity implements SensorEventListener{
         }
         imageRotation = imageRotation % 360;
 
-        Log.d(TAG, "imageRotation: " + imageRotation);
+        //Log.d(TAG, "imageRotation: " + imageRotation);
 
         if(imageRotation > 45 && imageRotation < 135){
                 heading = "right";

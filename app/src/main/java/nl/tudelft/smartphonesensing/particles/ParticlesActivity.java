@@ -43,7 +43,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     private static String TAG = "ParticlesActivity";
 
     //configuration
-    private static Integer particlesAmount = 100;
+    private static Integer particlesAmount = 1000;
 
     // number of particles to refactor:
     // must be less than particlesAmount
@@ -205,7 +205,8 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     /**
      * redraw, regenerate the canvas
      */
-    private void redraw(){
+    private static void redraw(){
+        Log.d(TAG, "I'm redrawing");
 
         // redrawing of the object
         canvas.drawColor(Color.WHITE);
@@ -339,16 +340,13 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         }
 
         // TODO - add functionality for reset button if deemed necessary
-
+        Log.d(TAG, "get here");
         redraw();
 
 
     }
 
     private void calculateParticlesPosition(int distanceWalkedMillimeters, int orientationWalkedDegrees){
-
-
-
 
         // variance of orientation and distance
         int distanceVariance = 5; // 5 pixel variance
@@ -441,6 +439,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             // update particleList
             particlesList.set(particleIdx,movedParticle);
 
+
         }
 
         /***
@@ -468,6 +467,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             // replace current particle at randomIdx with this new, random, refactored particle
             particlesList.set(randomIdx,newRandomParticle);
         }
+
+        Log.d(TAG, "redraw call 2");
+        redraw();
     }
 
     /**
