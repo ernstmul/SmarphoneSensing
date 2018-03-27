@@ -26,6 +26,8 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import nl.tudelft.smartphonesensing.R;
+import nl.tudelft.smartphonesensing.utils.sensors.Compass;
+import nl.tudelft.smartphonesensing.utils.sensors.Steps;
 
 
 /**
@@ -51,6 +53,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     //private List<Particle> particlesOriginalList;
     private Particle currentLocation;
 
+    //define sensors
+    private Compass compass;
+    private Steps steps;
+
     // define buttons
     private Button up,left,right,down,reset;
 
@@ -64,6 +70,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     // big red dot's current location
     private int actualLocationX = originalLocationX;
     private int actualLocationY = originalLocationY;
+
+    //how much centimeter is one step
+    private int stepSize = 74;
 
 
     @Override
@@ -84,6 +93,14 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         left = (Button) findViewById(R.id.buttonLeft);
         right = (Button) findViewById(R.id.buttonRight);
         reset = (Button) findViewById(R.id.buttonReset);
+
+
+        //intialialize sensors
+        compass = new Compass(getApplicationContext(), null, (ImageView) findViewById(R.id.compass_needle), false);
+        compass.setButtons(left, right, up, down);
+
+        steps = new Steps(getApplicationContext(), null, false);
+
 
         // set listeners on buttons
         up.setOnClickListener(this);
@@ -272,103 +289,26 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         // make sure we haven't pressed reset - otherwise we do not apply motion model
         if (!reset){
 
-            // init distance and orientation variables which include noise
-            int noisyDistanceWalked;
-            double noisyOrientationWalked;
 
-            // loop through particle list to apply motion model
-            for (int particleIdx = 0; particleIdx < particlesAmount; particleIdx++){
-
-                // currentParticle is the particle at its current location (no motion applied yet)
-                Particle currentParticle = particlesList.get(particleIdx);
-                int initX = currentParticle.getX();
-                int initY = currentParticle.getY();
-
-                // create random variables and define (Gaussian) noisy distance and orientation (based on variances defined at OnClick)
-                Random distanceRandom = new Random();
-                Random orientationRandom = new Random();
-                noisyDistanceWalked = distanceWalked + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
-                noisyOrientationWalked = (double) orientationWalked + orientationRandom.nextGaussian()*orientationVariance;
-
-                // create new Particle which represents moved particle position
-                Particle movedParticle = new Particle(canvas,width,height);
-
-                // find new x and y coordinates of moved particle and define the movedParticle
-                int moveX = - (int) Math.round(noisyDistanceWalked*Math.sin(Math.toRadians(noisyOrientationWalked)));
-                int moveY = (int) Math.round(noisyDistanceWalked*Math.cos(Math.toRadians(noisyOrientationWalked)));
-                int newX = initX + moveX;
-                int newY = initY + moveY;
-
-                movedParticle.defineParticlePosition(newX, newY, false);
-
-                /**
-                 *  Summary - we have:
-                 *  currentParticle - represents original particle position
-                 *  movedParticle - represents original particle moved with motion model
-                 */
-
-                // if movedParticle and trajectory from currentParticle violates obstacle boundaries,
-                // define new currentParticle based on random other particle in particlesList
-
-                // first try current particle and apply motion model
-                int randomParticleIdx = particleIdx;
-
-                // stop stuck while loop in case it gets stuck (typical when particleCount is small)
-                int counter = 0;
-
-                while((isCollision(movedParticle) || isInClosedArea(movedParticle) || isCollisionTrajectory(movedParticle, currentParticle)) && counter<50){
-
-                    // redefine current particle and moved particle from random index in particlesList
-                    randomParticleIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
-                    currentParticle = particlesList.get(randomParticleIdx);
-
-                    // apply motion model to this particle
-                    initX = currentParticle.getX();
-                    initY = currentParticle.getY();
-                    newX = initX + moveX;
-                    newY = initY + moveY;
-                    movedParticle.defineParticlePosition(newX, newY,false);
-
-                    // increase counter
-                    counter++;
-                }
-
-                // update particleList
-                particlesList.set(particleIdx,movedParticle);
-
-            }
-
-            /***
-             * Refactor particles
-             *
-             * This means re-assigning random particles to random map positions
-             *
-             * The idea is to allow for alternative particle positions in case all particles converge
-             * to the wrong location
-              */
-
-
-            for (int refactorIdx = 0; refactorIdx < refactorParticlesAmount; refactorIdx++){
-
-                // get random index within particle amount
-                int randomIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
-
-                // update new particles
-                Particle newRandomParticle = new Particle(canvas,width,height);
-
-                while(isCollision(newRandomParticle) || isInClosedArea(newRandomParticle)){
-                    newRandomParticle.assignRandomPosition();
-                }
-
-                // replace current particle at randomIdx with this new, random, refactored particle
-                particlesList.set(randomIdx,newRandomParticle);
-            }
 
         }
 
         // TODO - add functionality for reset button if deemed necessary
 
         redraw();
+
+    }
+
+    private void calculateParticlesPosition(){
+
+
+    }
+
+    /**
+     * detected walking
+     */
+    public void walkingDetected(){
+        Log.d(TAG, "I've made a step");
 
     }
 

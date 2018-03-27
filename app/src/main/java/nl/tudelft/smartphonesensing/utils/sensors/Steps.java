@@ -7,17 +7,20 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.widget.TextView;
 
+import nl.tudelft.smartphonesensing.particles.ParticlesActivity;
+
 import static android.content.Context.SENSOR_SERVICE;
 
 /**
  * Created by ernstmulders on 12/03/2018.
  */
 
-public class Steps implements SensorEventListener {
+public class Steps extends ParticlesActivity implements SensorEventListener {
 
     private Context context;
     private TextView steps_status_view;
     private SensorManager mSensorManager;
+    private boolean is_home; // determines if called from the home activity or the particleActivity
 
     private int stepCount;
 
@@ -26,10 +29,11 @@ public class Steps implements SensorEventListener {
      * @param c context
      * @param statusview homepage output text
      */
-    public Steps(Context c, TextView statusview){
+    public Steps(Context c, TextView statusview, boolean ishome){
         context = c;
         steps_status_view = statusview;
         stepCount = 0;
+        is_home = ishome;
 
         //create sensor manager
         mSensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
@@ -61,7 +65,10 @@ public class Steps implements SensorEventListener {
         if (event.values[0] == 1.0f) {
             stepCount++;
         }
-        steps_status_view.setText("Steps: " + stepCount);
+        if(is_home){steps_status_view.setText("Steps: " + stepCount + " stepsize:" + (19400 / stepCount));}
+        else{
+            super.walkingDetected();
+        }
     }
 
     @Override

@@ -12,6 +12,12 @@
         android:layout_height="480dp"
         android:background="@android:color/white" />
 
+    <ImageView
+        android:id="@+id/compass_needle"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_arrow"/>
+
     <Button
         android:id="@+id/buttonDown"
         android:layout_width="80dp"

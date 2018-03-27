@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -33,6 +34,8 @@ public class HomeActivity extends AppCompatActivity {
     private Button wifi_locate_button;
     private Button particle_3rd_floor_button;
     private Button particle_4th_floor_button;
+
+    private EditText step_size_value;
 
     private WifiSensor wifi;
     private Compass compass;
@@ -83,6 +86,12 @@ public class HomeActivity extends AppCompatActivity {
         particle_3rd_floor_button = (Button) findViewById(R.id.particle_3rd_floor_button);
         particle_4th_floor_button = (Button) findViewById(R.id.particle_4th_floor_button);
 
+        //edit text
+        step_size_value = (EditText) findViewById(R.id.step_size_value);
+
+        //get inputs
+
+
         //click listener for refresh button
         refresh_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,6 +123,7 @@ public class HomeActivity extends AppCompatActivity {
         particle_3rd_floor_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 //refresh the information
                 startParticles(3);
             }
@@ -131,9 +141,9 @@ public class HomeActivity extends AppCompatActivity {
 
         //create the sensors
         wifi = new WifiSensor(getApplicationContext());
-        compass = new Compass(getApplicationContext(), (TextView) findViewById(R.id.compass_status_text), (ImageView) findViewById(R.id.compass_needle));
+        compass = new Compass(getApplicationContext(), (TextView) findViewById(R.id.compass_status_text), (ImageView) findViewById(R.id.compass_needle), true);
         barometer = new Barometer(getApplicationContext(), (TextView) findViewById(R.id.barometer_status_text));
-        steps = new Steps(getApplicationContext(), (TextView) findViewById(R.id.steps_status_text));
+        steps = new Steps(getApplicationContext(), (TextView) findViewById(R.id.steps_status_text), true);
 
         //update the status page (home)
         updateInformation();
@@ -158,6 +168,9 @@ public class HomeActivity extends AppCompatActivity {
      * go to start particles activity
      */
     public void startParticles(Integer floor){
+        //get the stepsize
+        //integer stepsize = step_size_value.value();
+
         // start LocalizationActivity.class
         Bundle bundle = new Bundle();
         bundle.putInt("floor", floor);

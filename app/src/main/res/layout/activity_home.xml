@@ -313,7 +313,23 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="4th floor" />
+
+            <!-- step size input -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:value="Step size:"/>
+            <EditText
+                android:id='@+id/step_size_value'
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:inputType="number">
+            </EditText>
         </LinearLayout>
+
+
     </ScrollView>
 
 
