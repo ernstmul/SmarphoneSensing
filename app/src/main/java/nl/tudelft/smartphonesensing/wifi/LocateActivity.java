@@ -358,7 +358,7 @@ public class LocateActivity  extends AppCompatActivity {
         for(Integer cellIndex = 0; cellIndex < cellCount; cellIndex++){
             result[cellIndex] = prior[cellIndex]*cellVector[cellIndex]/priorCellVectorSum;
         }
-        return result; // shouldn't we normalize here ? TODO
+        return result; // shouldn't we normalize here ?
     }
 
     /*
