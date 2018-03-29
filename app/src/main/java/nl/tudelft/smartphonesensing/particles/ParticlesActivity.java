@@ -325,10 +325,33 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         //distanceWalked = (int) Math.round(Math.sqrt(distanceWalkedPixelsX^2 + distanceWalkedPixelsY^2));
 
         // make sure we haven't pressed reset - otherwise we do not apply motion model
+        // if reset NOT pressed, [up, down, left, right] IS pressed, do particle calulation
         if (!reset) {
 
             calculateParticlesPosition(distanceWalkedMillimeters,orientationWalkedDegrees );
 
+        } else {
+            // if reset IS pressed, put particles on map (probability)
+            // do reset of particles
+            // generate all particles and place them on the map
+
+            for(Integer particleCount = 0; particleCount < particlesAmount; particleCount++){
+                // generate a new particle
+                Particle particle = new Particle(canvas, screen_width, screen_height, particleCount);
+
+                // place particle at random position within bounds
+                while(isCollision(particle) || isInClosedArea(particle)){
+                    particle.assignRandomPosition();
+                }
+
+
+                // update our list of particles
+                particlesList.set(particleCount, particle);
+            }
+
+            walkedDistanceCm = 0;
+            stepCount = 0;
+            new redraw().execute("");
         }
 
         // TODO - add functionality for reset button if deemed necessary
