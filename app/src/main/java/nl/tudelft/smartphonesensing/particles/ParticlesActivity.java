@@ -12,6 +12,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -80,7 +81,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     private static int floor;
 
     //how much millimeters is one step
-    private static int stepSize = 740;
+    private static int stepSize = 700;
+    private static int walkedDistanceCm = 0;
+    private static int stepCount = 0;
 
     // floor 3 dimensions in millimeters
     private int floor3Width = 14400;
@@ -94,6 +97,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
     private static int screen_width = 0;
     private static int screen_height = 0;
+
+    private static TextView calc_counter;
+    private static TextView step_distance;
+    private static TextView step_counter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +123,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         right = (Button) findViewById(R.id.buttonRight);
         reset = (Button) findViewById(R.id.buttonReset);
 
+        calc_counter = (TextView) findViewById(R.id.calc_counter);
+        step_distance = (TextView) findViewById(R.id.step_distance);
+        step_counter = (TextView) findViewById(R.id.step_counter);
+
 
         //intialialize sensors
         compass = new Compass(getApplicationContext(), null, (ImageView) findViewById(R.id.compass_needle), false);
@@ -124,10 +135,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         steps = new Steps(getApplicationContext(), null, false);
 
         //listen to steps
-        mSensorManager = (SensorManager) getApplicationContext().getSystemService(SENSOR_SERVICE);
+       /* mSensorManager = (SensorManager) getApplicationContext().getSystemService(SENSOR_SERVICE);
         //and listen to changes
         Sensor pS = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
-        mSensorManager.registerListener(this, pS, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this, pS, SensorManager.SENSOR_DELAY_GAME);*/
 
         // set listeners on buttons
         up.setOnClickListener(this);
@@ -173,9 +184,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         //generate all particles and place them on the map
         particlesList = new ArrayList<>();
-        for(Integer particleCount = 0; particleCount < particlesAmount; particleCount++){
+        Integer particleCount = 0;
+        for(particleCount = 0; particleCount < particlesAmount; particleCount++){
             // generate a new particle
-            Particle particle = new Particle(canvas, screen_width, screen_height);
+            Particle particle = new Particle(canvas, screen_width, screen_height, particleCount);
 
             // place particle at random position within bounds
             while(isCollision(particle) || isInClosedArea(particle)){
@@ -187,7 +199,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         }
 
         // Create particle showing current location
-        currentLocation = new Particle(canvas, screen_width, screen_height);
+        currentLocation = new Particle(canvas, screen_width, screen_height, particleCount + 1);
         textStatus.setText("Start");
         actualLocationX = originalLocationX;
         actualLocationY = originalLocationY;
@@ -196,34 +208,14 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         particlesList.add(currentLocation);
 
         // and redraw everything
-        redraw();
+        //redraw();
+        new redraw().execute("");
 
         Log.d(TAG, "load floor: " + floor);
 
     }
 
-    /**
-     * redraw, regenerate the canvas
-     */
-    private static void redraw(){
-        Log.d(TAG, "I'm redrawing");
 
-        // redrawing of the object
-        canvas.drawColor(Color.WHITE);
-
-        for(ShapeDrawable wall : walls)
-            wall.draw(canvas);
-
-        for(Particle particle : particlesList){
-            particle.redraw();
-        }
-
-        //redraw the closed areas if needed
-        if(shouldDrawClosedAreas) {
-            for (ShapeDrawable closedArea : closed_areas)
-                closedArea.draw(canvas);
-        }
-    }
 
     /**
      * determines if particle is in a closed area (within an obstacle)
@@ -341,16 +333,16 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         // TODO - add functionality for reset button if deemed necessary
         Log.d(TAG, "get here");
-        redraw();
+        //redraw();
 
 
     }
 
     private void calculateParticlesPosition(int distanceWalkedMillimeters, int orientationWalkedDegrees){
-
+        long starttime = System.currentTimeMillis();
         // variance of orientation and distance
-        int distanceVariance = 5; // 5 pixel variance
-        int orientationVariance = 5; // 45 degrees orientation variance
+        int distanceVariance = 300; // 5 pixel variance
+        int orientationVariance = 10; // 45 degrees orientation variance
 
         // init distance and orientation variables which include noise
         int noisyDistanceWalkedMillimeters;
@@ -358,6 +350,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         int noisyDistanceWalkedPixelsX;
         int noisyDistanceWalkedPixelsY;
+
+        ArrayList<Particle> survived = new ArrayList<>();
+        ArrayList<Particle> dead = new ArrayList<>();
 
         // loop through particle list to apply motion model
         for (int particleIdx = 0; particleIdx < particlesAmount; particleIdx++) {
@@ -378,6 +373,8 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             int noisyDistanceWalkedMillimetersX = (int) Math.round(noisyDistanceWalkedMillimeters*Math.sin(Math.toRadians(noisyOrientationWalkedDegrees)));
             int noisyDistanceWalkedMillimetersY = (int) Math.round(noisyDistanceWalkedMillimeters*Math.cos(Math.toRadians(noisyOrientationWalkedDegrees)));
 
+            Log.d(TAG, "noisyX" + noisyDistanceWalkedMillimetersX + " noisyY:" + noisyDistanceWalkedMillimetersY);
+
             if(floor == 3){
                 noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX*screen_width/floor3Width;
                 noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY*screen_height/floor3Height;
@@ -394,7 +391,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             // noisyOrientationWalkedDegrees = (double) orientationWalkedDegrees + orientationRandom.nextGaussian()*orientationVariance;
 
             // create new Particle which represents moved particle position
-            Particle movedParticle = new Particle(canvas,screen_width,screen_height);
+            Particle movedParticle = new Particle(canvas,screen_width,screen_height, particleIdx);
 
             // find new x and y coordinates of moved particle and define the movedParticle
             //int moveX = - (int) Math.round(noisyDistanceWalked*Math.sin(Math.toRadians(noisyOrientationWalked)));
@@ -417,10 +414,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             int randomParticleIdx = particleIdx;
 
             // stop stuck while loop in case it gets stuck (typical when particleCount is small)
-            int counter = 0;
-
-            while((isCollision(movedParticle) || isInClosedArea(movedParticle) || isCollisionTrajectory(movedParticle, currentParticle)) && counter<50){
-
+           /* int counter = 0;
+//isCollision(movedParticle) || isInClosedArea(movedParticle) ||isCollisionTrajectory(movedParticle, currentParticle)
+            while(( isCollisionTrajectory(movedParticle, currentParticle)) && counter<50){
+                Log.d(TAG, "Particle" + particleIdx + " is in CollisionTrajectory");
                 // redefine current particle and moved particle from random index in particlesList
                 randomParticleIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
                 currentParticle = particlesList.get(randomParticleIdx);
@@ -434,12 +431,40 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
                 // increase counter
                 counter++;
+            }*/
+
+
+
+            //check if new particle is dead
+            if(isCollisionTrajectory(movedParticle, currentParticle)){
+                dead.add(movedParticle);
             }
+            else{
+                //its not, so add to the alive list
+                survived.add(movedParticle);
+            }
+
 
             // update particleList
             particlesList.set(particleIdx,movedParticle);
 
 
+        }
+
+
+
+        //reassign the dead particles to an alive particle
+        int randomParticleIdx;
+        for(Particle deadParticle : dead){
+            //get a random particle that survived
+            randomParticleIdx = ThreadLocalRandom.current().nextInt(0, survived.size() - 1);
+            Particle survivedParticle = survived.get(randomParticleIdx);
+
+            //copy its location to the dead particle
+            deadParticle.defineParticlePosition(survivedParticle.getX(), survivedParticle.getY(), false);
+
+            //and put it in the correct place in the list
+            particlesList.set(deadParticle.getIndex(), deadParticle);
         }
 
         /***
@@ -458,7 +483,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             int randomIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
 
             // update new particles
-            Particle newRandomParticle = new Particle(canvas,screen_width,screen_height);
+            Particle newRandomParticle = new Particle(canvas,screen_width,screen_height, randomIdx);
 
             while(isCollision(newRandomParticle) || isInClosedArea(newRandomParticle)){
                 newRandomParticle.assignRandomPosition();
@@ -468,19 +493,31 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             particlesList.set(randomIdx,newRandomParticle);
         }
 
-        Log.d(TAG, "redraw call 2");
-        redraw();
+       // Log.d(TAG, "redraw call 2");
+        new redraw().execute("");
+
+        long taken = System.currentTimeMillis() - starttime;
+        Log.d(TAG, "it took me:" + taken + "ms - list size:" + particlesList.size());
+
+        calc_counter.setText(taken + "ms");
     }
 
     /**
      * detected walking
      */
     public void walkingDetected(){
-        Log.d(TAG, "I've made a step");
+        //Log.d(TAG, "I've made a step");
          int distanceWalkedMillimeters = 1 * stepSize;   //1 = because the function is called for every step
 
+        walkedDistanceCm = walkedDistanceCm + (distanceWalkedMillimeters / 10);
+        stepCount++;
+
+        step_distance.setText(walkedDistanceCm + "cm");
+        step_counter.setText(stepCount + "steps");
+
+
         String direction = heading;
-        Log.d(TAG, "heading:" + heading + ";");
+       // Log.d(TAG, "heading:" + heading + ";");
         int directionInt = 0;
 
         switch(direction){
@@ -529,6 +566,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
      */
 
     private boolean isCollisionTrajectory(Particle newPosition, Particle oldPosition){
+
         int newX = newPosition.getX();
         int newY = newPosition.getY();
 
@@ -592,7 +630,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-            walkingDetected();
+          //  walkingDetected();
 
     }
 
@@ -600,4 +638,50 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     public void onAccuracyChanged(Sensor sensor, int i) {
 
     }
+
+    private class redraw extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            //Log.d(TAG, "I'm redrawing");
+
+            // redrawing of the object
+            canvas.drawColor(Color.WHITE);
+
+            for(ShapeDrawable wall : walls)
+                wall.draw(canvas);
+
+            for(Particle particle : particlesList){
+                particle.redraw();
+            }
+
+            //redraw the closed areas if needed
+            if(shouldDrawClosedAreas) {
+                for (ShapeDrawable closedArea : closed_areas)
+                    closedArea.draw(canvas);
+            }
+
+            return "drawn";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            //TextView txt = (TextView) findViewById(R.id.output);
+            //txt.setText("Executed"); // txt.setText(result);
+            // might want to change "executed" for the returned string passed
+            // into onPostExecute() but that is upto you
+        }
+
+        @Override
+        protected void onPreExecute() {}
+
+        @Override
+        protected void onProgressUpdate(Void... values) {}
+    }
+    /**
+     * redraw, regenerate the canvas
+     */
+    //private static void redraw(){
+
+    //}
 }

@@ -18,6 +18,29 @@
         android:layout_height="20dp"
         android:src="@drawable/ic_arrow"/>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/calc_counter"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="000ms" />
+        <TextView
+            android:id="@+id/step_counter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 steps" />
+        <TextView
+            android:id="@+id/step_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 cm" />
+    </LinearLayout>
+
+
     <Button
         android:id="@+id/buttonDown"
         android:layout_width="80dp"

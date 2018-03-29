@@ -28,11 +28,14 @@ public class Particle {
     private int posX;
     private int posY;
 
-    public Particle(Canvas c, Integer width, Integer height){
+    private int index;  //index in the particleList
+
+    public Particle(Canvas c, Integer width, Integer height, Integer listIndex){
         //store the canvas, width and height
         canvas = c;
         screen_width = width;
         screen_height = height;
+        index = listIndex;
     }
 
     /**
@@ -68,6 +71,13 @@ public class Particle {
             particle.getPaint().setColor(Color.BLUE);
             particle.setBounds(posX - particle_size, posY -  particle_size, posX +  particle_size, posY + particle_size);
         }
+    }
+
+    /**
+     * returns the list index
+     */
+    public int getIndex(){
+        return index;
     }
 
     /**
