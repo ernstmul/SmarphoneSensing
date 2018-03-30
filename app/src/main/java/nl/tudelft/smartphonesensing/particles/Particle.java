@@ -73,6 +73,10 @@ public class Particle {
         }
     }
 
+    public void changeColor(){
+        particle.getPaint().setColor(Color.CYAN);
+    }
+
     /**
      * returns the list index
      */

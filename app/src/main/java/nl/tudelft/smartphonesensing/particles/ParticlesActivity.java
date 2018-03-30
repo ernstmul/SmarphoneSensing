@@ -63,7 +63,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     private static Steps steps;
 
     // define buttons
-    private static Button up,left,right,down,reset;
+    private static Button up,left,right,down,reset,locateMe;
 
     public static String heading = "";
 
@@ -122,6 +122,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         left = (Button) findViewById(R.id.buttonLeft);
         right = (Button) findViewById(R.id.buttonRight);
         reset = (Button) findViewById(R.id.buttonReset);
+        locateMe = (Button) findViewById(R.id.buttonLocateMe);
 
         calc_counter = (TextView) findViewById(R.id.calc_counter);
         step_distance = (TextView) findViewById(R.id.step_distance);
@@ -146,6 +147,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         left.setOnClickListener(this);
         right.setOnClickListener(this);
         reset.setOnClickListener(this);
+        locateMe.setOnClickListener(this);
 
         // set the text view
         textStatus = (TextView) findViewById(R.id.textViewStatus);
@@ -203,7 +205,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         textStatus.setText("Start");
         actualLocationX = originalLocationX;
         actualLocationY = originalLocationY;
-        currentLocation.defineParticlePosition(actualLocationX, actualLocationY,true);
+        currentLocation.defineParticlePosition(actualLocationX, actualLocationY,false);
         // add current location to list of particles so it gets redrawn every time
         particlesList.add(currentLocation);
 
@@ -238,10 +240,11 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v){
-        Log.d(TAG, "button pressed: red dot moved");
+        Log.d(TAG, "button pressed");
 
         // check if reset is performed, if so, do not use motion model
         boolean reset = false;
+        boolean manualMove = false;
 
         Log.d(TAG, "height = " + String.valueOf(screen_height));
         Log.d(TAG, "width = " + String.valueOf(screen_width));
@@ -253,6 +256,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         int distanceWalkedMillimeters = 500;
         int orientationWalkedDegrees = 0;
 
+        currentLocation.defineParticlePosition(actualLocationX,actualLocationY,false);
+        //currentLocation.redraw();
+        new redraw().execute("");
+
 
         // move current location (big red particle)
         switch (v.getId()) {
@@ -261,28 +268,32 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
                 actualLocationY = actualLocationY - distanceWalkedMillimeters*screen_height/floor3Height;
                 orientationWalkedDegrees = 180;
-                currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
+                //currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
+                manualMove = true;
                 break;
             }
             case R.id.buttonDown:{
                 textStatus.setText("Down");
                 actualLocationY = actualLocationY + distanceWalkedMillimeters*screen_height/floor3Height;
                 orientationWalkedDegrees = 0;
-                currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
+                //currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
+                manualMove = true;
                 break;
             }
             case R.id.buttonLeft:{
                 textStatus.setText("Left");
                 actualLocationX = actualLocationX - distanceWalkedMillimeters*screen_width/floor3Width;
                 orientationWalkedDegrees = 270;
-                currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
+                //currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
+                manualMove = true;
                 break;
             }
             case R.id.buttonRight:{
                 textStatus.setText("Right");
                 actualLocationX = actualLocationX + distanceWalkedMillimeters*screen_width/floor3Width;
                 orientationWalkedDegrees = 90;
-                currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
+                //currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
+                manualMove = true;
                 break;
             }
             case R.id.buttonReset:{
@@ -294,6 +305,11 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 //currentLocation.defineParticlePosition(actualLocationX, actualLocationY,true);
                 break;
             }
+            case R.id.buttonLocateMe:{
+                applyRANSACLocalization();
+                textStatus.setText("Located!");
+                break;
+            }
         }
 
         // input from compass and IMU
@@ -301,7 +317,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         //orientationWalkedDegrees = 0;
 
         // orientation in degrees clockwise of North i.e. 45 = NE movement, 90 = E movement
-        // Note -  NORTH points DOWNWARDS on map - TODO need to account for actual NORTH ito MAP when implementing with compass
+        // Note -  NORTH points DOWNWARDS on map -  need to account for actual NORTH ito MAP when implementing with compass
 
         int distanceWalkedMillimetersX = (int) Math.round(distanceWalkedMillimeters*Math.cos(Math.toRadians((double) orientationWalkedDegrees)));
         int distanceWalkedMillimetersY = (int) Math.round(distanceWalkedMillimeters*Math.sin(Math.toRadians((double) orientationWalkedDegrees)));
@@ -320,17 +336,19 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         // distance walked in pixel distances
         //int distanceWalkedPixels = distanceWalkedMillimeters*pixelcount/height;
-        // TODO need to convert to meter distance using height and width - remember to account for orientation angle with different aspect ratio
+        // need to convert to meter distance using height and width - remember to account for orientation angle with different aspect ratio
 
         //distanceWalked = (int) Math.round(Math.sqrt(distanceWalkedPixelsX^2 + distanceWalkedPixelsY^2));
 
         // make sure we haven't pressed reset - otherwise we do not apply motion model
         // if reset NOT pressed, [up, down, left, right] IS pressed, do particle calulation
-        if (!reset) {
+        if (manualMove) {
 
             calculateParticlesPosition(distanceWalkedMillimeters,orientationWalkedDegrees );
 
-        } else {
+        }
+
+        if (reset){
             // if reset IS pressed, put particles on map (probability)
             // do reset of particles
             // generate all particles and place them on the map
@@ -349,17 +367,141 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 particlesList.set(particleCount, particle);
             }
 
+            // redraw the canvas
+
             walkedDistanceCm = 0;
             stepCount = 0;
+
+            // redraw on a separate thread
             new redraw().execute("");
         }
 
-        // TODO - add functionality for reset button if deemed necessary
+//        if (v.getId() == R.id.buttonLocateMe){
+//            textStatus.setText("located!");
+//        }
+
+
         Log.d(TAG, "get here");
         //redraw();
 
 
     }
+
+    /**
+     * uses a RANSAC algorithm to determine the most probable current location
+     */
+    private void applyRANSACLocalization(){
+        int[][] particleLocations = new int[2][particlesAmount];
+
+        currentLocation.defineParticlePosition(currentLocation.getX(),currentLocation.getY(),false);
+        currentLocation.redraw();
+
+        // fill array with particle locations
+        for (int idx = 0;idx < particlesAmount;idx++){
+            particleLocations[0][idx] = particlesList.get(idx).getX();
+            particleLocations[1][idx] = particlesList.get(idx).getY();
+        }
+
+        // RANSAC
+        int rounds = 52;
+        int NinliersMax = 0;
+        int idxMax = 0;
+        int distThreshold = 100; // pixels
+        distThreshold = distThreshold*distThreshold;
+
+        // try find the perfect particle 'round' times
+        for (int iter = 0; iter < rounds; iter++){
+
+            // choose random index
+            int randomIdx = ThreadLocalRandom.current().nextInt(0,particlesAmount-1);
+
+            int currentParticleX = particlesList.get(randomIdx).getX();
+            int currentParticleY = particlesList.get(randomIdx).getY();
+
+            particlesList.get(randomIdx).changeColor();
+
+            int Ninliers = 0;
+
+
+
+            for (int i = 0; i < particlesAmount; i++){
+
+                //Log.d(TAG, "partLoc[0][i]: " + Integer.toString(particleLocations[0][i]) + "    partLoc[1][i]: " + Integer.toString(particleLocations[1][i]));
+                //Log.d(TAG, "current X : " + Integer.toString(currentParticleX) + "    current Y : " + Integer.toString(currentParticleY));
+
+                //Log.d(TAG, "X : " + Double.toString(Math.pow( (double) (particleLocations[0][i] - currentParticleX),2.0)) + "    Y : " + Double.toString(Math.pow( (double)(particleLocations[1][i] - currentParticleY),2)));
+
+                int dist =  (int) Math.round(Math.pow( (particleLocations[0][i] - currentParticleX),2.0) + Math.pow((particleLocations[1][i] - currentParticleY),2));
+                //Log.d(TAG, "dist: " + Integer.toString(dist));
+                if (dist<distThreshold){
+
+                    Ninliers++;
+                }
+            }
+
+            //Log.d(TAG, "Ninliers: " + Integer.toString(Ninliers) + "   NinliersMax: " +  Integer.toString(NinliersMax) + "    RandomIdx: " + Integer.toString(randomIdx) + "    idxMax: " + Integer.toString(idxMax));
+
+
+            if (Ninliers > NinliersMax){
+                NinliersMax = Ninliers;
+                idxMax = randomIdx;
+            }
+        }
+
+        //Log.d(TAG, "NinliersMax: " + Integer.toString(NinliersMax));
+
+        // we now have IdxMax associated with the maximum inliers
+        // ArrayList<Integer> Npos = new ArrayList<>();
+
+        //Particle currentMaxInliers = particlesList.get(idxMax);
+
+         /*
+          * calculate centroid of best particle area
+          */
+
+        int maxIdxParticleX = particlesList.get(idxMax).getX();
+        int maxIdxParticleY = particlesList.get(idxMax).getY();
+
+        // log all inliers to an array
+        ArrayList<Integer> inliersX = new ArrayList<>();
+        ArrayList<Integer> inliersY = new ArrayList<>();
+
+        for (int i = 0; i < particlesAmount; i++) {
+            int dist =  (int) Math.round(Math.pow( (particleLocations[0][i] - maxIdxParticleX),2.0) + Math.pow((particleLocations[1][i] - maxIdxParticleY),2));
+            //Log.d(TAG, "dist: " + Integer.toString(dist));
+            if (dist<distThreshold){
+                inliersX.add(particleLocations[0][i]);
+                inliersY.add(particleLocations[1][i]);
+            }
+        }
+
+        int centroidX = 0;
+        int centroidY = 0;
+
+        // get centroid
+        for(int i = 0; i < inliersX.size(); i++){
+            centroidX = centroidX + inliersX.get(i);
+            centroidY = centroidY + inliersY.get(i);
+        }
+
+        centroidX = centroidX/NinliersMax;
+        centroidY = centroidY/NinliersMax;
+
+        //currentLocation.defineParticlePosition(particlesList.get(idxMax).getX(),particlesList.get(idxMax).getY(),true);
+
+        //currentLocation.defineParticlePosition();
+
+        currentLocation.defineParticlePosition(centroidX,centroidY,true);
+
+        //Log.d(TAG, "new current location particle: ");
+        //Log.d(TAG, Integer.toString(centroidX));
+        //Log.d(TAG, Integer.toString(centroidY));
+
+        //new redraw().execute("");
+        // make sure red dot is on top
+        currentLocation.redraw();
+    }
+
 
     private void calculateParticlesPosition(int distanceWalkedMillimeters, int orientationWalkedDegrees){
         long starttime = System.currentTimeMillis();
@@ -538,6 +680,8 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         step_distance.setText(walkedDistanceCm + "cm");
         step_counter.setText(stepCount + "steps");
 
+        // do not create red dot for estimated current location
+        currentLocation.defineParticlePosition(currentLocation.getX(),currentLocation.getY(),false);
 
         String direction = heading;
        // Log.d(TAG, "heading:" + heading + ";");
@@ -607,7 +751,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             right = newX;
         } /*else {
             // if equal, add extra width to ensure rect does not have 0 area
-            // TODO - possibly not necessary?
+            //  - possibly not necessary?
             left = newX;
             right = oldX + 1;
         }*/
@@ -621,7 +765,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             bottom = newY;
         } /*else {
             // if equal, add extra height to ensure rect does not have 0 area
-            // TODO - possibly not necessary?
+            //  - possibly not necessary?
             top = newY;
             bottom = oldY + 1;
         }*/
