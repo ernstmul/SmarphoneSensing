@@ -135,8 +135,8 @@ public class TrainActivity extends AppCompatActivity {
                 Log.d(TAG, "Creating csv");
                 wifi_train_done_button.setText("Creating CSV ");
 
-                //create the csv files
-                //generate the csv's
+                // create the csv files
+                // generate the csv's
                 for(AccessPointMatrix matrix : matrices){
 
                     Log.d(TAG, "Createing csv for:" + matrix.BSSID);

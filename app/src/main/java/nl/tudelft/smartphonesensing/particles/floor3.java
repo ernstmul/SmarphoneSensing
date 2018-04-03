@@ -284,10 +284,10 @@ public class floor3 {
         int right = (int)(((double)right_input/(double)this.floorWidthInCm) * (double)this.screenWidth);
         int bottom = (int) (((double)bottom_input/(double)this.floorHeightInCm) * (double)this.screenHeight);
 
-        Log.d(TAG, "left:" + left);
-        Log.d(TAG, "top: " + top);
-        Log.d(TAG, "right: " + right);
-        Log.d(TAG, "bottom: " + bottom);
+        //Log.d(TAG, "left:" + left);
+        //Log.d(TAG, "top: " + top);
+        //Log.d(TAG, "right: " + right);
+        //Log.d(TAG, "bottom: " + bottom);
 
         d.setBounds(
                 left,
