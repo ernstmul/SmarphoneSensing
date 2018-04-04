@@ -31,7 +31,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -143,6 +145,8 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     private static String accelerometerName;
 
     private int trainingCount = 0;
+
+    private boolean[] stairsDetectedArray = {false, false, false, false, false, false, false, false, false, false, false, false};
 
     //private String android_id = Settings.Secure.getString(getApplicationContext().getContentResolver(),Settings.Secure.ANDROID_ID);
 
@@ -273,6 +277,8 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         }
 
         current_floor.setText(Integer.toString(floor));
+
+
 
         Log.d(TAG, "closed area count: " + closed_areas.size());
 
@@ -903,7 +909,25 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                     sampling.setText("Walking normally!");
                 }
 
-                if(walkingOnStairs != previousWalkingOnStairs && System.currentTimeMillis() > walkingOnStairsTime + 30000){
+                // array of previous stairs detections
+                int lengthStairsArray = stairsDetectedArray.length;
+
+                // shift values up
+                for (int i = 0; i < lengthStairsArray-1; i++ ){
+                    stairsDetectedArray[i] = stairsDetectedArray[i+1];
+                }
+                // update last entry of array
+                stairsDetectedArray[lengthStairsArray-1] = walkingOnStairs;
+
+                // count number of true values in array
+                int numberOfStairsDetected = 0;
+                for (int i = 0; i<lengthStairsArray;i++){
+                    if (stairsDetectedArray[i]) {
+                        numberOfStairsDetected++;
+                    }
+                }
+                // if 8 out of 12 (length of stairsDetectedArray) is true, we switch floors
+                if((numberOfStairsDetected > 4) && System.currentTimeMillis() > walkingOnStairsTime + 30000){
                     //switch floor
                     walkingOnStairsTime = System.currentTimeMillis();
 
@@ -922,6 +946,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
                     current_floor.setText(Integer.toString(floor));
                 }
+
                 previousWalkingOnStairs = walkingOnStairs;
 
                // Log.d(TAG, " am I walking on stairs??????: " + Boolean.toString(walkingOnStairs));
@@ -1420,4 +1445,5 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         public double getPCA2() { return this.PCA2;}
 
     }
+
 }
