@@ -130,7 +130,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     // IMU sample
     private static boolean busySampling = false;
     private static boolean busyTraining = false;
-    private static boolean normalWalking = true;
+    private static int normalWalking = 0;
 
     // walking on stairs boolean
     private static boolean walkingOnStairs = false;
@@ -415,13 +415,26 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 break;
             }
             case R.id.buttonWalking:{
-                normalWalking = !normalWalking;
-                if (normalWalking){
-                    walking.setText("normal");
-                } else {
-                    walking.setText("stairs");
+                if (normalWalking == 0){
+                    normalWalking = 1;
+                    walking.setText("Stairs UP");
                 }
-                Log.d(TAG, "we are training for normal walking?: " + Boolean.toString(normalWalking));
+                if (normalWalking == 1){
+                    normalWalking = 2;
+                    walking.setText("Stairs DOWN");
+                }
+                if (normalWalking == 2){
+                    normalWalking = 0;
+                    walking.setText("Walking");
+                }
+
+//                normalWalking = !normalWalking;
+//                if (normalWalking){
+//                    walking.setText("normal");
+//                } else {
+//                    walking.setText("stairs");
+//                }
+                Log.d(TAG, "we are training for normal walking?: " + Integer.toString(normalWalking));
                 break;
             }
         }
@@ -1257,15 +1270,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
          * Assign variables to features
          */
         // check if we are training "normal walking" or "stairs walking" from button
-        int stairs;
-        if (normalWalking){
-            stairs = 0;
-        } else {
-            stairs = 1;
-        }
 
         // return features object
-        features featureVals = new features(maxGyroY,varianceAccY,meanEnergyXZ,varianceEnergyXZ,varianceAccZ,meanAccZ,stairs);
+        features featureVals = new features(maxGyroY,varianceAccY,meanEnergyXZ,varianceEnergyXZ,varianceAccZ,meanAccZ,normalWalking);
         //Log.d(TAG, "mean Acc Z: " + Double.toString(meanAccZ)); // YES
         //Log.d(TAG, "measurement Count: " + Double.toString(measurementCount)); // YES
         //Log.d(TAG,"mean Acc Y: " + Double.toString(meanAccY)); // YES
