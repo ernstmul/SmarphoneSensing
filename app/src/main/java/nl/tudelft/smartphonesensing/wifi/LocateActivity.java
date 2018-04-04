@@ -1,5 +1,6 @@
 package nl.tudelft.smartphonesensing.wifi;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
@@ -89,6 +91,9 @@ public class LocateActivity  extends AppCompatActivity {
         wifi_get_location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //delete app cache
+                deleteCache(getApplicationContext());
 
                 //reset
                 measurement_count = 0;
@@ -380,6 +385,31 @@ public class LocateActivity  extends AppCompatActivity {
 //    private double[] determinePosterior(){
 //
 //    }
+
+    public static void deleteCache(Context context) {
+        try {
+            File dir = context.getCacheDir();
+            deleteDir(dir);
+            Log.d(TAG, "cache cleared");
+        } catch (Exception e) {}
+    }
+
+    public static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+            return dir.delete();
+        } else if(dir!= null && dir.isFile()) {
+            return dir.delete();
+        } else {
+            return false;
+        }
+    }
 
     private boolean isMatchingStoppingCriteria(Double[] prior){
         Double maxVal = 0.0;
