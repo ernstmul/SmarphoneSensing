@@ -160,6 +160,7 @@ public class Compass extends ParticlesActivity implements SensorEventListener{
     }
 
 
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 

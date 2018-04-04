@@ -76,7 +76,7 @@ public class Steps extends ParticlesActivity implements SensorEventListener {
         if(is_home){steps_status_view.setText("Steps: " + stepCount + " stepsize:" + (19400 / stepCount));} //
         else{
             Log.d("Steps", "Walking!");
-            super.walkingDetected();
+            super.walkingDetected(heading);
         }
     }
 
