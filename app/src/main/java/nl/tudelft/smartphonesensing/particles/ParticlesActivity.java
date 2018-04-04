@@ -135,8 +135,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
     // walking on stairs boolean
     private static boolean walkingOnStairs = false;
+    private static boolean previousWalkingOnStairs = false;
+    private static long walkingOnStairsTime = 0;
     //long prevWalkingDetectedTime = 0;
-    private static int currentFloor;
 
     private static String gyroscopeName;
     private static String accelerometerName;
@@ -264,16 +265,14 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             floor3 floor3 = new floor3(screen_width,screen_height,floor3Width,floor3Height);
             walls = floor3.getWalls(screen_width, screen_height);
             closed_areas = floor3.getClosedAreas(screen_width, screen_height);
-            currentFloor = 3;
         }
         else{
             floor4 floor4 = new floor4(screen_width,screen_height);
             walls = floor4.getWalls(screen_width, screen_height);
             closed_areas = floor4.getClosedAreas(screen_width, screen_height);
-            currentFloor = 4;
         }
 
-        current_floor.setText("Floor: " + Integer.toString(currentFloor));
+        current_floor.setText(Integer.toString(floor));
 
         Log.d(TAG, "closed area count: " + closed_areas.size());
 
@@ -851,8 +850,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         }
 
         //make the calculations
-        calculateParticlesPosition(distanceWalkedMillimeters,directionInt);
-
+        if (!busyTraining) {
+            calculateParticlesPosition(distanceWalkedMillimeters, directionInt);
+        }
 
 
 
@@ -902,6 +902,27 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 } else {
                     sampling.setText("Walking normally!");
                 }
+
+                if(walkingOnStairs != previousWalkingOnStairs && System.currentTimeMillis() > walkingOnStairsTime + 30000){
+                    //switch floor
+                    walkingOnStairsTime = System.currentTimeMillis();
+
+                    if(floor == 3){
+                        floor4 floor4 = new floor4(screen_width,screen_height);
+                        walls = floor4.getWalls(screen_width, screen_height);
+                        closed_areas = floor4.getClosedAreas(screen_width, screen_height);
+                        floor = 4;
+                    }
+                    else{
+                        floor3 floor3 = new floor3(screen_width,screen_height,floor3Width,floor3Height);
+                        walls = floor3.getWalls(screen_width, screen_height);
+                        closed_areas = floor3.getClosedAreas(screen_width, screen_height);
+                        floor = 3;
+                    }
+
+                    current_floor.setText(Integer.toString(floor));
+                }
+                previousWalkingOnStairs = walkingOnStairs;
 
                // Log.d(TAG, " am I walking on stairs??????: " + Boolean.toString(walkingOnStairs));
 

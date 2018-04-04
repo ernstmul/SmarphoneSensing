@@ -51,7 +51,8 @@
             android:id="@+id/textCurrentFloor"
             android:layout_width="wrap_content"
             android:layout_height="19dp"
-            android:text="Floor: "/>
+            style="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Title"
+            android:text=""/>
     </LinearLayout>
 
 
