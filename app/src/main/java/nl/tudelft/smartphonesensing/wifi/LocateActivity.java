@@ -392,7 +392,7 @@ public class LocateActivity  extends AppCompatActivity {
             }
 
             // write to where am I text box
-            locate_area_prediction_text.setText("I'm in : " + (mostOccuringIndex + 1) + "("+biggestCount + " out of "+measurement_number+")\n\n" + prob);
+            locate_area_prediction_text.setText("I'm in : " + (mostOccuringIndex + 1) + "("+biggestCount/(measurement_number - 5) + "%)\n\n" + prob);
         }
 
     }
