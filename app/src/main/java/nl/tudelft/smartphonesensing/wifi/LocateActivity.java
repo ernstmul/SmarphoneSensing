@@ -57,14 +57,13 @@ public class LocateActivity  extends AppCompatActivity {
     private Integer measurement_count = 0;
     private Integer[] cells_found;
 
+    private String previousScan = "";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wifilocate);
-
-        //create the wifi
-        wifi = new WifiSensor(getApplicationContext());
 
         //buttons
         wifi_locate_done_button = (Button) findViewById(R.id.wifi_locate_done_button);
@@ -98,6 +97,10 @@ public class LocateActivity  extends AppCompatActivity {
                 //reset
                 measurement_count = 0;
                 cells_found = new Integer[cellCount];
+                previousScan = "";
+
+                //create the wifi
+                wifi = new WifiSensor(getApplicationContext());
 
                 //calculate location
                 calculateLocation();
@@ -171,11 +174,24 @@ public class LocateActivity  extends AppCompatActivity {
             // 1. Do a new scan of the Wifi Access Points
             List<ScanResult> currentScanResultList = wifi.getScanResults();
 
+            //keep getting new results
+            while(previousScan.equals(currentScanResultList.toString())){
+                currentScanResultList = wifi.getScanResults();
+            }
+            //and remember for next time
+            previousScan = currentScanResultList.toString();
+
+            Log.d(TAG,  "list:" + currentScanResultList.toString());
+
             // 2. sort the scanned results according to RSSI values using comparator
             Collections.sort(currentScanResultList, comparator);
 
             // shows all scan results in sorted order (from Comparator above)
             Log.d(TAG, "Current scan results: ...");
+
+
+
+
             Log.d(TAG, currentScanResultList.toString());
 
             for(Integer checkCount = 0; checkCount < currentScanResultList.size(); checkCount++) {
@@ -335,11 +351,12 @@ public class LocateActivity  extends AppCompatActivity {
         }
         prob = prob + "";
 
-        if(measurement_count < measurement_number){
-            if(cells_found[cellChosenIndex] == null){
+        if(measurement_count < measurement_number ){
+
+            if(cells_found[cellChosenIndex] == null && measurement_count > 4){
                 cells_found[cellChosenIndex] = 1;
             }
-            else {
+            else if(measurement_count > 4) {
                 cells_found[cellChosenIndex]++; //increment the value
             }
             measurement_count++;
@@ -360,9 +377,7 @@ public class LocateActivity  extends AppCompatActivity {
                         }
                     });
                 }
-            }, 1000);
-
-
+            }, 10);
 
 
         }
