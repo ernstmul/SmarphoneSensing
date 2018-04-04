@@ -818,7 +818,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     /**
      * Updates states when walking is detected
      */
-    public void walkingDetected(){
+    public void walkingDetected(String direction){
         Log.d(TAG, "I've made a step");
         int distanceWalkedMillimeters = 1 * stepSize;   //1 = because the function is called for every step
 
@@ -831,7 +831,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         // do not create red dot for estimated current location
         currentLocation.defineParticlePosition(currentLocation.getX(),currentLocation.getY(),false);
 
-        String direction = heading;
         // Log.d(TAG, "heading:" + heading + ";");
         int directionInt = 0;
 
