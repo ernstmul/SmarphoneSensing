@@ -82,6 +82,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     private static TextView step_distance;
     private static TextView step_counter;
     private static TextView step_size;
+    private static TextView current_floor;
 
     // manual location (Big red dot) original location on map
     private static int originalLocationX = 500;
@@ -135,6 +136,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     // walking on stairs boolean
     private static boolean walkingOnStairs = false;
     //long prevWalkingDetectedTime = 0;
+    private static int currentFloor;
 
     private static String gyroscopeName;
     private static String accelerometerName;
@@ -177,6 +179,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         status = (TextView) findViewById(R.id.textViewStatus);
         sampling = (TextView) findViewById(R.id.textSampling);
         step_size = (TextView) findViewById(R.id.step_size);
+        current_floor = (TextView) findViewById(R.id.textCurrentFloor);
 
         step_size.setText("Size:" + stepSize);
 
@@ -261,12 +264,16 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             floor3 floor3 = new floor3(screen_width,screen_height,floor3Width,floor3Height);
             walls = floor3.getWalls(screen_width, screen_height);
             closed_areas = floor3.getClosedAreas(screen_width, screen_height);
+            currentFloor = 3;
         }
         else{
             floor4 floor4 = new floor4(screen_width,screen_height);
             walls = floor4.getWalls(screen_width, screen_height);
             closed_areas = floor4.getClosedAreas(screen_width, screen_height);
+            currentFloor = 4;
         }
+
+        current_floor.setText("Floor: " + Integer.toString(currentFloor));
 
         Log.d(TAG, "closed area count: " + closed_areas.size());
 

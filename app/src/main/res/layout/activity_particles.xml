@@ -19,25 +19,29 @@
         android:src="@drawable/ic_arrow"/>
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="75dp"
+        android:layout_height="124dp"
         android:orientation="vertical">
+
         <TextView
             android:id="@+id/calc_counter"
-            android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:text="000ms" />
+
         <TextView
             android:id="@+id/step_counter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0 steps" />
+
         <TextView
             android:id="@+id/step_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0 cm" />
+
         <TextView
             android:id="@+id/step_size"
             android:layout_width="wrap_content"
@@ -138,6 +142,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginStart="60dp"
         android:text="Sampling Status"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/buttonRight"
         app:layout_constraintStart_toEndOf="@+id/buttonUp" />
 
@@ -153,9 +158,19 @@
         android:id="@+id/buttonWalking"
         android:layout_width="82dp"
         android:layout_height="37dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="4dp"
         android:text="CHANGE ME"
         android:textSize="10sp"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="480dp" />
+        app:layout_constraintBottom_toTopOf="@+id/buttonLeft"
+        app:layout_constraintEnd_toStartOf="@+id/buttonLeft" />
+
+    <TextView
+        android:id="@+id/textCurrentFloor"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:text="Floor: "
+        app:layout_constraintLeft_toLeftOf="parent"
+        tools:layout_editor_absoluteY="95dp" />
 
 </android.support.constraint.ConstraintLayout>
