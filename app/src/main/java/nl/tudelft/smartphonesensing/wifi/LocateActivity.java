@@ -49,6 +49,11 @@ public class LocateActivity  extends AppCompatActivity {
     //set number of cells
     private Integer cellCount = 20;
 
+    //set number of measurements before results
+    private Integer measurement_number = 10;
+    private Integer measurement_count = 0;
+    private Integer[] cells_found;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +87,10 @@ public class LocateActivity  extends AppCompatActivity {
         wifi_get_location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //reset
+                measurement_count = 0;
+                cells_found = new Integer[cellCount];
 
                 //calculate location
                 calculateLocation();
@@ -319,8 +328,30 @@ public class LocateActivity  extends AppCompatActivity {
         }
         prob = prob + "";
 
-        // write to where am I text box
-        locate_area_prediction_text.setText("I'm in : " + (cellChosenIndex + 1) + "\n\n" + prob);
+        if(measurement_count < measurement_number){
+            if(cells_found[cellChosenIndex] == null){
+                cells_found[cellChosenIndex] = 1;
+            }
+            else {
+                cells_found[cellChosenIndex]++; //increment the value
+            }
+            measurement_count++;
+            calculateLocation();
+        }
+        else{
+            Integer biggestCount = 0;
+            Integer mostOccuringIndex = -1;
+            for(Integer checkCount = 0; checkCount < cellCount; checkCount++){
+                if(cells_found[checkCount] != null && cells_found[checkCount] > biggestCount){
+                    biggestCount = cells_found[checkCount];
+                    mostOccuringIndex = checkCount;
+                }
+            }
+
+            // write to where am I text box
+            locate_area_prediction_text.setText("I'm in : " + (mostOccuringIndex + 1) + "("+biggestCount + " out of "+measurement_number+")\n\n" + prob);
+        }
+
     }
 
 //    private double[] determinePosterior(){

@@ -81,6 +81,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     private static TextView calc_counter;
     private static TextView step_distance;
     private static TextView step_counter;
+    private static TextView step_size;
 
     // manual location (Big red dot) original location on map
     private static int originalLocationX = 500;
@@ -156,6 +157,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         Bundle bundle = getIntent().getExtras();
         floor = bundle.getInt("floor");
+        stepSize = bundle.getInt("stepsize");
 
         // define or set buttons
         up = (Button) findViewById(R.id.buttonUp);
@@ -174,6 +176,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         step_counter = (TextView) findViewById(R.id.step_counter);
         status = (TextView) findViewById(R.id.textViewStatus);
         sampling = (TextView) findViewById(R.id.textSampling);
+        step_size = (TextView) findViewById(R.id.step_size);
+
+        step_size.setText("Size:" + stepSize);
 
 
         //intialialize sensors
@@ -506,6 +511,19 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         //Log.d(TAG, "get here");
     }
 
+    @Override
+    public void onBackPressed(){
+        //reset stepcount
+        stepCount = 0;
+
+        //unregister sensors
+        Log.d(TAG, "unregister sensors");
+        steps.unregisterListener();
+        mSensorManager.unregisterListener(this);
+
+        super.onBackPressed();
+    }
+
     /**
      * uses a RANSAC algorithm to determine the most probable current location based on the particle
      * spread utilizing a circular location model
@@ -820,36 +838,36 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         // if we are training, add to features list
         // if not busy training, just analyze data
         if (busyTraining) {
-            Log.d(TAG, "--------------------------------------------");
-            Log.d(TAG, "busy training here! (within walking detected)");
+            //Log.d(TAG, "--------------------------------------------");
+            //Log.d(TAG, "busy training here! (within walking detected)");
             // get features
             if (stepCount <= 1) {
                 // first step, clear list
                 featuresList.clear();
                 imuMeasurementsList.clear();
-                Log.d(TAG,"step count <= 1: clearing lists");
+                //Log.d(TAG,"step count <= 1: clearing lists");
             } else {
-                Log.d(TAG, "step count >= 1: writing features to list");
-                Log.d(TAG, "length of imuMeasurementsList before clear: " + Integer.toString(imuMeasurementsList.size()));
+                //Log.d(TAG, "step count >= 1: writing features to list");
+               // Log.d(TAG, "length of imuMeasurementsList before clear: " + Integer.toString(imuMeasurementsList.size()));
                 featuresList.add(getSVMFeatures(imuMeasurementsList));
-                Log.d(TAG, "length of featuresList: " + Integer.toString(featuresList.size()));
+               // Log.d(TAG, "length of featuresList: " + Integer.toString(featuresList.size()));
                 imuMeasurementsList.clear();
-                Log.d(TAG, "length of imuMeasurementsList after clear: " + Integer.toString(imuMeasurementsList.size()));
+               // Log.d(TAG, "length of imuMeasurementsList after clear: " + Integer.toString(imuMeasurementsList.size()));
             }
             // add to featureslist
 
         } else {
             // determine if we are walking normally or on up/down stairs
-            Log.d(TAG, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-            Log.d(TAG, "determine if we are walking or stairs! (within walking detected)");
+            //Log.d(TAG, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+           // Log.d(TAG, "determine if we are walking or stairs! (within walking detected)");
 
             if (stepCount <= 1){
                 //featuresList.clear();
                 imuMeasurementsList.clear();
-                Log.d(TAG,"step count <= 1: clearing lists");
+               // Log.d(TAG,"step count <= 1: clearing lists");
             } else {
-                Log.d(TAG, "step count >= 1: writing features to list");
-                Log.d(TAG, "length of imuMeasurementsList before clear: " + Integer.toString(imuMeasurementsList.size()));
+               // Log.d(TAG, "step count >= 1: writing features to list");
+               // Log.d(TAG, "length of imuMeasurementsList before clear: " + Integer.toString(imuMeasurementsList.size()));
 
                 features currentFeatures = getSVMFeatures(imuMeasurementsList);
 
@@ -864,11 +882,11 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                     sampling.setText("Walking normally!");
                 }
 
-                Log.d(TAG, " am I walking on stairs??????: " + Boolean.toString(walkingOnStairs));
+               // Log.d(TAG, " am I walking on stairs??????: " + Boolean.toString(walkingOnStairs));
 
-                Log.d(TAG, "length of featuresList: " + Integer.toString(featuresList.size()));
+               // Log.d(TAG, "length of featuresList: " + Integer.toString(featuresList.size()));
                 imuMeasurementsList.clear();
-                Log.d(TAG, "length of imuMeasurementsList after clear: " + Integer.toString(imuMeasurementsList.size()));
+               // Log.d(TAG, "length of imuMeasurementsList after clear: " + Integer.toString(imuMeasurementsList.size()));
             }
         }
     }

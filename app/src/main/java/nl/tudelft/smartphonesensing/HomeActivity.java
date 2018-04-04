@@ -169,11 +169,12 @@ public class HomeActivity extends AppCompatActivity {
      */
     public void startParticles(Integer floor){
         //get the stepsize
-        //integer stepsize = step_size_value.value();
+        Integer stepsize = Integer.parseInt(step_size_value.getText().toString());
 
         // start LocalizationActivity.class
         Bundle bundle = new Bundle();
         bundle.putInt("floor", floor);
+        bundle.putInt("stepsize", stepsize);
 
         Intent myIntent = new Intent(HomeActivity.this,
                 ParticlesActivity.class);

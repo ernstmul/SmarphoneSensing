@@ -48,6 +48,12 @@ public class WifiSensor {
      * return the scanresults
      */
     public List<ScanResult> getScanResults(){
+        //first turn off wifi
+        wifiManager.setWifiEnabled(false);
+
+        //now turn it back on again
+        wifiManager.setWifiEnabled(true);
+
         //perform new scan
         this.performNewScan();
 
