@@ -239,8 +239,8 @@ public class LocateActivity  extends AppCompatActivity {
 
                     // add to overall posteriorSumAP - could add weight for certain SSIDs if necessary
                     Double weight = 1.0;
-                    weight = 16.43 - 3.13*Math.log(accesspoint.level);
-                    weight = 1.0;
+                    weight = 2 - 0.3*Math.log(accesspoint.level);
+                   // weight = 1.0;
 
                     for (int j = 0; j < cellCount; j++) {
                         //Log.d(TAG, String.valueOf(j));
