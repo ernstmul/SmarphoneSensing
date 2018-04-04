@@ -3,6 +3,7 @@ package nl.tudelft.smartphonesensing.wifi;
 import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -53,6 +54,7 @@ public class LocateActivity  extends AppCompatActivity {
     private Integer measurement_number = 10;
     private Integer measurement_count = 0;
     private Integer[] cells_found;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -336,7 +338,28 @@ public class LocateActivity  extends AppCompatActivity {
                 cells_found[cellChosenIndex]++; //increment the value
             }
             measurement_count++;
-            calculateLocation();
+            Log.d(TAG, "get here");
+
+            Timer buttonTimer = new Timer();
+            buttonTimer.schedule(new TimerTask() {
+
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "and here");
+                            locate_area_prediction_text.setText("Measuring " + measurement_count + " out of " + measurement_number);
+                            calculateLocation();
+                        }
+                    });
+                }
+            }, 1000);
+
+
+
+
         }
         else{
             Integer biggestCount = 0;
