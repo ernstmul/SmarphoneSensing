@@ -422,15 +422,16 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 break;
             }
             case R.id.buttonWalking:{
+                Log.d(TAG, "walking:" + normalWalking);
                 if (normalWalking == 0){
                     normalWalking = 1;
                     walking.setText("Stairs UP");
                 }
-                if (normalWalking == 1){
+                else if (normalWalking == 1){
                     normalWalking = 2;
                     walking.setText("Stairs DOWN");
                 }
-                if (normalWalking == 2){
+                else if (normalWalking == 2){
                     normalWalking = 0;
                     walking.setText("Walking");
                 }
