@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 import android.widget.TextView;
 
 import nl.tudelft.smartphonesensing.particles.ParticlesActivity;
@@ -53,6 +54,13 @@ public class Steps extends ParticlesActivity implements SensorEventListener {
     }
 
     /**
+     * Unregisters the listerener event
+     */
+    public void unregisterListener(){
+        mSensorManager.unregisterListener(this);
+    }
+
+    /**
      * returns if the device has the correct sensors
      */
     public boolean hasCorrectSensors(){
@@ -67,6 +75,7 @@ public class Steps extends ParticlesActivity implements SensorEventListener {
         }
         if(is_home){steps_status_view.setText("Steps: " + stepCount + " stepsize:" + (19400 / stepCount));}
         else{
+            Log.d("Steps", "Walking!");
             super.walkingDetected();
         }
     }

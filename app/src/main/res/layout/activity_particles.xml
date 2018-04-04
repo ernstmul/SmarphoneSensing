@@ -38,6 +38,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0 cm" />
+        <TextView
+            android:id="@+id/step_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Size:" />
     </LinearLayout>
 
 

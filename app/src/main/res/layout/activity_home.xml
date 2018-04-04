@@ -318,15 +318,29 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:value="Step size:"/>
-            <EditText
-                android:id='@+id/step_size_value'
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                style="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Title"
+                android:text="Step size:"/>
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:inputType="number">
-            </EditText>
+                android:orientation="horizontal">
+                <EditText
+                    android:id='@+id/step_size_value'
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="700"
+                    android:inputType="number">
+                </EditText>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:text="mm"/>
+            </LinearLayout>
         </LinearLayout>
 
 
