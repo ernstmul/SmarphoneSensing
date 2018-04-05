@@ -89,8 +89,6 @@ public class HomeActivity extends AppCompatActivity {
         //edit text
         step_size_value = (EditText) findViewById(R.id.step_size_value);
 
-        //get inputs
-
 
         //click listener for refresh button
         refresh_button.setOnClickListener(new View.OnClickListener() {
@@ -199,7 +197,6 @@ public class HomeActivity extends AppCompatActivity {
         //first check wifi
         TextView wifi_status_label = (TextView) findViewById(R.id.wifi_status_label);
         if(wifi.hasPermission()){
-            Log.d(TAG, "Permissions are good");
             wifi_status_label.setBackgroundColor(getResources().getColor(R.color.okBackground));
             wifi_status_label.setText("OK");
 
@@ -210,7 +207,6 @@ public class HomeActivity extends AppCompatActivity {
 
         }
         else{
-            Log.d(TAG, "not all permissions");
             //wifi doesn't has all permissions, so show the error
             wifi_status_label.setBackgroundColor(getResources().getColor(R.color.warningBackground));
             wifi_status_label.setText("Not all permissions");
@@ -219,7 +215,6 @@ public class HomeActivity extends AppCompatActivity {
         //compass check for all sensors present
         TextView compass_status_label = (TextView) findViewById(R.id.compass_status_label);
         if(compass.hasCorrectSensors()){
-            Log.d(TAG, "Compass is good");
             compass_status_label.setBackgroundColor(getResources().getColor(R.color.okBackground));
             compass_status_label.setText("OK");
         }
@@ -231,7 +226,6 @@ public class HomeActivity extends AppCompatActivity {
         //barometer check for all sensors present
         TextView barometer_status_label = (TextView) findViewById(R.id.barometer_status_label);
         if(barometer.hasCorrectSensors()){
-            Log.d(TAG, "Barometer is good");
             barometer_status_label.setBackgroundColor(getResources().getColor(R.color.okBackground));
             barometer_status_label.setText("OK");
         }
@@ -243,7 +237,6 @@ public class HomeActivity extends AppCompatActivity {
         //steps check for all sensors present
         TextView steps_status_label = (TextView) findViewById(R.id.steps_status_label);
         if(steps.hasCorrectSensors()){
-            Log.d(TAG, "Step counter is good");
             steps_status_label.setBackgroundColor(getResources().getColor(R.color.okBackground));
             steps_status_label.setText("OK");
 

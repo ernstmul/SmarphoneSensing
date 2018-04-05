@@ -75,7 +75,6 @@ public class WifiSensor {
      **/
     public boolean hasPermission(){
 
-
         return (
                 (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_WIFI_STATE)
                 == PackageManager.PERMISSION_GRANTED) &&

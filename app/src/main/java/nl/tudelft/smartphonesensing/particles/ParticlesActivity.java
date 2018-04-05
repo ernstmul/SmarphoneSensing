@@ -64,7 +64,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
     private static List<ShapeDrawable> walls;
     private static List<ShapeDrawable> closed_areas;
     private static List<Particle> particlesList;
-    //private List<Particle> particlesOriginalList;
     private static Particle currentLocation;
 
     //define sensors
@@ -148,9 +147,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
     private boolean[] stairsDetectedArray = {false, false, false, false, false, false, false, false, false, false, false, false};
 
-    //private String android_id = Settings.Secure.getString(getApplicationContext().getContentResolver(),Settings.Secure.ANDROID_ID);
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -198,7 +194,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
         // if the default accelerometer exists
-
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         gyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
@@ -212,39 +207,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             gyroscopeName = "L3GD20 Gyroscope";
             accelerometerName = "LIS3DH Accelerometer";
         }
-        Log.d(TAG, "device ID: " + android_id);
-        Log.d(TAG, "Gyroscope name: " + gyroscopeName);
-        Log.d(TAG, "Accelerometer name: " + accelerometerName);
-
-//        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-//            // set accelerometer
-//            accelerometer = mSensorManager
-//                    .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-//            // register 'this' as a listener that updates values. Each time a sensor value changes,
-//            // the method 'onSensorChanged()' is called.
-//            mSensorManager.registerListener(this, accelerometer,
-//                    SensorManager.SENSOR_DELAY_NORMAL);
-//        } else {
-//            // No accelerometer!
-//        }
-//
-//        if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
-//            // set accelerometer
-//            gyroscope = mSensorManager
-//                    .getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-//            // register 'this' as a listener that updates values. Each time a sensor value changes,
-//            // the method 'onSensorChanged()' is called.
-//            mSensorManager.registerListener(this, gyroscope,
-//                    SensorManager.SENSOR_DELAY_NORMAL);
-//        } else {
-//            // No gyroscope!
-//        }
-
-        //listen to steps
-       /* mSensorManager = (SensorManager) getApplicationContext().getSystemService(SENSOR_SERVICE);
-        //and listen to changes
-        Sensor pS = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
-        mSensorManager.registerListener(this, pS, SensorManager.SENSOR_DELAY_GAME);*/
 
         // set listeners on buttons
         up.setOnClickListener(this);
@@ -278,11 +240,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         current_floor.setText(Integer.toString(floor));
 
-
-
-        Log.d(TAG, "closed area count: " + closed_areas.size());
-
-        // draw the objects
+       // draw the objects
         for(ShapeDrawable wall : walls)
             wall.draw(canvas);
 
@@ -318,8 +276,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         // add current location to list of particles so it gets redrawn every time
         particlesList.add(currentLocation);
 
-        // and redraw everything
-        //redraw();
+        // and redraw everything async
         new redraw().execute("");
 
         Log.d(TAG, "load floor: " + floor);
@@ -334,9 +291,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         if(p.particle == null){return true;}
 
         for(ShapeDrawable closedArea : closed_areas) {
-            //Log.d(TAG, "bounds:" + closedArea.getBounds());
             if(isShapeCollision(closedArea,p.particle)){
-                //Log.d(TAG, "restricted area collision");
                 return true;
             }
 
@@ -355,16 +310,12 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         boolean sampleButtonPressed = false;
         boolean trainButtonPressed = false;
 
-        //Log.d(TAG, "height = " + String.valueOf(screen_height));
-        //Log.d(TAG, "width = " + String.valueOf(screen_width));
-
         //int distanceWalked = distanceWalkedMillimeters*screenwidth/floor4Width;
         int distanceWalkedMillimeters = 500;
         int orientationWalkedDegrees = 0;
 
         currentLocation.defineParticlePosition(actualLocationX,actualLocationY,false);
         currentLocation.redraw();
-        //new redraw().execute("");
 
         /**
          * Check which button is pressed
@@ -375,7 +326,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
                 actualLocationY = actualLocationY - distanceWalkedMillimeters*screen_height/floor3Height;
                 orientationWalkedDegrees = 180;
-                //currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
                 manualMovePressed = true;
                 break;
             }
@@ -383,7 +333,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 status.setText("Down");
                 actualLocationY = actualLocationY + distanceWalkedMillimeters*screen_height/floor3Height;
                 orientationWalkedDegrees = 0;
-                //currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
                 manualMovePressed = true;
                 break;
             }
@@ -391,7 +340,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 status.setText("Left");
                 actualLocationX = actualLocationX - distanceWalkedMillimeters*screen_width/floor3Width;
                 orientationWalkedDegrees = 270;
-                //currentLocation.defineParticlePosition(actualLocationX,actualLocationY,true);
                 manualMovePressed = true;
                 break;
             }
@@ -406,10 +354,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             case R.id.buttonReset:{
                 resetPressed = true;
                 status.setText("Reset");
-                //actualLocationX = originalLocationX;
-                //actualLocationY = originalLocationY;
-                //orientationWalked = 0;
-                //currentLocation.defineParticlePosition(actualLocationX, actualLocationY,true);
                 break;
             }
             case R.id.buttonLocateMe:{
@@ -418,7 +362,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 break;
             }
             case R.id.buttonSampleIMU:{
-                //status.setText("Sampling");
                 sampleButtonPressed = true;
                 break;
             }
@@ -427,7 +370,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 break;
             }
             case R.id.buttonWalking:{
-                Log.d(TAG, "walking:" + normalWalking);
                 if (normalWalking == 0){
                     normalWalking = 1;
                     walking.setText("Stairs UP");
@@ -441,13 +383,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                     walking.setText("Walking");
                 }
 
-//                normalWalking = !normalWalking;
-//                if (normalWalking){
-//                    walking.setText("normal");
-//                } else {
-//                    walking.setText("stairs");
-//                }
-                Log.d(TAG, "we are training for normal walking?: " + Integer.toString(normalWalking));
+
                 break;
             }
         }
@@ -520,12 +456,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             busyTraining = !busyTraining;
             if (busyTraining) {
                 trainingCount++;
-                Log.d(TAG, "busy training");
                 sampling.setText("Training started");
             } else {
                 // stop training and write CSV files
-                Log.d(TAG, "training has been stopped");
-                Log.d(TAG, "features list size: " + Integer.toString(featuresList.size()));
                 if (featuresList.size() > 0){
                     //Log.d(TAG, "writing CSV of feature lists");
                     writeFeatureDataToCsv(getApplicationContext());
@@ -534,7 +467,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             }
         }
 
-        //Log.d(TAG, "get here");
     }
 
     @Override
@@ -589,22 +521,11 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
 
             for (int i = 0; i < particlesAmount; i++){
-
-                //Log.d(TAG, "partLoc[0][i]: " + Integer.toString(particleLocations[0][i]) + "    partLoc[1][i]: " + Integer.toString(particleLocations[1][i]));
-                //Log.d(TAG, "current X : " + Integer.toString(currentParticleX) + "    current Y : " + Integer.toString(currentParticleY));
-
-                //Log.d(TAG, "X : " + Double.toString(Math.pow( (double) (particleLocations[0][i] - currentParticleX),2.0)) + "    Y : " + Double.toString(Math.pow( (double)(particleLocations[1][i] - currentParticleY),2)));
-
                 int dist =  (int) Math.round(Math.pow( (particleLocations[0][i] - currentParticleX),2.0) + Math.pow((particleLocations[1][i] - currentParticleY),2));
-                //Log.d(TAG, "dist: " + Integer.toString(dist));
                 if (dist<distThreshold){
-
                     Ninliers++;
                 }
             }
-
-            //Log.d(TAG, "Ninliers: " + Integer.toString(Ninliers) + "   NinliersMax: " +  Integer.toString(NinliersMax) + "    RandomIdx: " + Integer.toString(randomIdx) + "    idxMax: " + Integer.toString(idxMax));
-
 
             if (Ninliers > NinliersMax){
                 NinliersMax = Ninliers;
@@ -623,7 +544,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         for (int i = 0; i < particlesAmount; i++) {
             int dist =  (int) Math.round(Math.pow( (particleLocations[0][i] - maxIdxParticleX),2.0) + Math.pow((particleLocations[1][i] - maxIdxParticleY),2));
-            //Log.d(TAG, "dist: " + Integer.toString(dist));
 
             // check if distance is within a specified threshold
             if (dist<distThreshold){
@@ -647,7 +567,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         currentLocation.defineParticlePosition(centroidX,centroidY,true);
 
-        //new redraw().execute("");
         // make sure red dot is on top
         currentLocation.redraw();
     }
@@ -659,9 +578,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
      */
     private void calculateParticlesPosition(int distanceWalkedMillimeters, int orientationWalkedDegrees){
         long starttime = System.currentTimeMillis();
+
         // variance of orientation and distance
-        int distanceVariance = 300; // 5 pixel variance
-        int orientationVariance = 10; // 45 degrees orientation variance
+        int distanceVariance = 300; // 300 pixel variance
+        int orientationVariance = 10; // 10 degrees orientation variance
 
         // init distance and orientation variables which include noise
         int noisyDistanceWalkedMillimeters;
@@ -692,8 +612,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             int noisyDistanceWalkedMillimetersX = (int) Math.round(noisyDistanceWalkedMillimeters*Math.sin(Math.toRadians(noisyOrientationWalkedDegrees)));
             int noisyDistanceWalkedMillimetersY = (int) Math.round(noisyDistanceWalkedMillimeters*Math.cos(Math.toRadians(noisyOrientationWalkedDegrees)));
 
-            //Log.d(TAG, "noisyX" + noisyDistanceWalkedMillimetersX + " noisyY:" + noisyDistanceWalkedMillimetersY);
-
             if(floor == 3){
                 noisyDistanceWalkedPixelsX = noisyDistanceWalkedMillimetersX*screen_width/floor3Width;
                 noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY*screen_height/floor3Height;
@@ -703,18 +621,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 noisyDistanceWalkedPixelsY = noisyDistanceWalkedMillimetersY*screen_height/floor4Height;
             }
 
-            //int noisyDistanceWalkedPixlesY = distanceWalkedPixelsY + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
-
-            //noisyDistanceWalked = distanceWalked + (int) Math.round(distanceRandom.nextGaussian()*distanceVariance);
-
-            // noisyOrientationWalkedDegrees = (double) orientationWalkedDegrees + orientationRandom.nextGaussian()*orientationVariance;
-
             // create new Particle which represents moved particle position
             Particle movedParticle = new Particle(canvas,screen_width,screen_height, particleIdx);
 
             // find new x and y coordinates of moved particle and define the movedParticle
-            //int moveX = - (int) Math.round(noisyDistanceWalked*Math.sin(Math.toRadians(noisyOrientationWalked)));
-            //int moveY = (int) Math.round(noisyDistanceWalked*Math.cos(Math.toRadians(noisyOrientationWalked)));
             int newX = initX + noisyDistanceWalkedPixelsX;
             int newY = initY + noisyDistanceWalkedPixelsY;
 
@@ -725,34 +635,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
              *  currentParticle - represents original particle position
              *  movedParticle - represents original particle moved with motion model
              */
-
-            // if movedParticle and trajectory from currentParticle violates obstacle boundaries,
-            // define new currentParticle based on random other particle in particlesList
-
-            // first try current particle and apply motion model
-            int randomParticleIdx = particleIdx;
-
-            // stop stuck while loop in case it gets stuck (typical when particleCount is small)
-           /* int counter = 0;
-//isCollision(movedParticle) || isInClosedArea(movedParticle) ||isCollisionTrajectory(movedParticle, currentParticle)
-            while(( isCollisionTrajectory(movedParticle, currentParticle)) && counter<50){
-                Log.d(TAG, "Particle" + particleIdx + " is in CollisionTrajectory");
-                // redefine current particle and moved particle from random index in particlesList
-                randomParticleIdx = ThreadLocalRandom.current().nextInt(0, particlesAmount-1);
-                currentParticle = particlesList.get(randomParticleIdx);
-
-                // apply motion model to this particle
-                initX = currentParticle.getX();
-                initY = currentParticle.getY();
-                newX = initX + noisyDistanceWalkedPixelsX;
-                newY = initY + noisyDistanceWalkedPixelsY;
-                movedParticle.defineParticlePosition(newX, newY,false);
-
-                // increase counter
-                counter++;
-            }*/
-
-
 
             //check if new particle is dead
             if(isCollisionTrajectory(movedParticle, currentParticle)){
@@ -812,11 +694,10 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             particlesList.set(randomIdx,newRandomParticle);
         }
 
-       // Log.d(TAG, "redraw call 2");
+       //redraw async
         new redraw().execute("");
 
         long taken = System.currentTimeMillis() - starttime;
-        //Log.d(TAG, "it took me:" + taken + "ms - list size:" + particlesList.size());
 
         calc_counter.setText(taken + "ms");
     }
@@ -825,7 +706,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
      * Updates states when walking is detected
      */
     public void walkingDetected(String direction){
-        Log.d(TAG, "I've made a step");
         int distanceWalkedMillimeters = 1 * stepSize;   //1 = because the function is called for every step
 
         walkedDistanceCm = walkedDistanceCm + (distanceWalkedMillimeters / 10);
@@ -864,36 +744,25 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         // if we are training, add to features list
         // if not busy training, just analyze data
         if (busyTraining) {
-            //Log.d(TAG, "--------------------------------------------");
-            //Log.d(TAG, "busy training here! (within walking detected)");
             // get features
             if (stepCount <= 1) {
                 // first step, clear list
                 featuresList.clear();
                 imuMeasurementsList.clear();
-                //Log.d(TAG,"step count <= 1: clearing lists");
+
             } else {
-                //Log.d(TAG, "step count >= 1: writing features to list");
-               // Log.d(TAG, "length of imuMeasurementsList before clear: " + Integer.toString(imuMeasurementsList.size()));
                 featuresList.add(getSVMFeatures(imuMeasurementsList));
-               // Log.d(TAG, "length of featuresList: " + Integer.toString(featuresList.size()));
                 imuMeasurementsList.clear();
-               // Log.d(TAG, "length of imuMeasurementsList after clear: " + Integer.toString(imuMeasurementsList.size()));
+
             }
-            // add to featureslist
+
 
         } else {
             // determine if we are walking normally or on up/down stairs
-            //Log.d(TAG, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-           // Log.d(TAG, "determine if we are walking or stairs! (within walking detected)");
 
             if (stepCount <= 1){
-                //featuresList.clear();
                 imuMeasurementsList.clear();
-               // Log.d(TAG,"step count <= 1: clearing lists");
             } else {
-               // Log.d(TAG, "step count >= 1: writing features to list");
-               // Log.d(TAG, "length of imuMeasurementsList before clear: " + Integer.toString(imuMeasurementsList.size()));
 
                 features currentFeatures = getSVMFeatures(imuMeasurementsList);
 
@@ -947,12 +816,8 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                 }
 
                 previousWalkingOnStairs = walkingOnStairs;
-
-               // Log.d(TAG, " am I walking on stairs??????: " + Boolean.toString(walkingOnStairs));
-
-               // Log.d(TAG, "length of featuresList: " + Integer.toString(featuresList.size()));
                 imuMeasurementsList.clear();
-               // Log.d(TAG, "length of imuMeasurementsList after clear: " + Integer.toString(imuMeasurementsList.size()));
+
             }
         }
     }
@@ -999,12 +864,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         } else { //if (newX > oldX)
             left = oldX;
             right = newX;
-        } /*else {
-            // if equal, add extra width to ensure rect does not have 0 area
-            //  - possibly not necessary?
-            left = newX;
-            right = oldX + 1;
-        }*/
+        }
 
         // check y values
         if (newY <= oldY){
@@ -1013,12 +873,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         } else { // if (newY > oldY)
             top = oldY;
             bottom = newY;
-        } /*else {
-            // if equal, add extra height to ensure rect does not have 0 area
-            //  - possibly not necessary?
-            top = newY;
-            bottom = oldY + 1;
-        }*/
+        }
 
         // create trajectory rectangle between two particles
         Rect trajectoryRect = new Rect(left, top, right, bottom);
@@ -1110,12 +965,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
      */
     private void writeFeatureDataToCsv(Context context){
         StringBuffer csvProcessed = new StringBuffer("");
-        Log.d(TAG, "writing features CSV file");
-
         String csvFeaturesFileName = "dataFeatures" + Integer.toString(trainingCount) + ".csv";
-        Log.d(TAG, "csv Features file name: " + csvFeaturesFileName);
-
-        //features currentFeatures = getSVMFeatures(imuMeasurementsList);
 
         for (int idx = 0; idx < featuresList.size(); idx++) {
             csvProcessed.append(Double.toString(featuresList.get(idx).getX1()));
@@ -1137,7 +987,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         //create the file
         try {
             if(context == null){
-                Log.d(TAG, "Context is null");
+                Log.e(TAG, "Context is null");
             }
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(csvFeaturesFileName, context.MODE_PRIVATE));
             outputStreamWriter.write(csvProcessed.toString());
@@ -1154,12 +1004,9 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
      */
     @Override
     public void onSensorChanged(SensorEvent event) {
-        //Log.d(TAG, "sensor change called!!!");
-          //  walkingDetected();
         String sensorName = event.sensor.getName();
         long timeInMillis = 0;
 
-        //Log.d(TAG, sensorName);
         if (sensorName.equals(gyroscopeName)){ //3-axis Gyroscope
             //Log.d(TAG, "gyro!!!!");
             gX = event.values[0];
@@ -1168,13 +1015,11 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         }
 
         if (sensorName.equals(accelerometerName)){ //3-axis Accelerometer
-            //Log.d(TAG, "accelerometer!");
             aX = event.values[0];
             aY = event.values[1];
             aZ = event.values[2];
 
             // only add to list once, otherwise get same measurement twice
-
             timeInMillis = (new Date()).getTime()
                     + (event.timestamp - System.nanoTime()) / 1000000L;
 
@@ -1183,9 +1028,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             if (stepCount>0 || busySampling){     // && (timeInMillis<prevWalkingDetectedTime+5000)){
                 IMU newMeasurement = new IMU(aX,aY,aZ,gX,gY,gZ,timeInMillis);
                 imuMeasurementsList.add(newMeasurement);
-                //Log.d(TAG, "imuMeasurementList onSensorChange: " + Integer.toString(imuMeasurementsList.size()));
             }
-            //Log.d(TAG, "aX: " + Float.toString(aX) + "  aY: " + Float.toString(aY) + "  aZ: " + Float.toString(aZ) + "  gX: " + Float.toString(gX) + "  gY: " + Float.toString(gY) + "  gZ: " + Float.toString(gZ) + "  time: " + Long.toString(timeInMillis));
         }
 
 
@@ -1203,7 +1046,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         @Override
         protected String doInBackground(String... params) {
-            //Log.d(TAG, "I'm redrawing");
 
             // redrawing of the object
             canvas.drawColor(Color.WHITE);
@@ -1226,10 +1068,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         @Override
         protected void onPostExecute(String result) {
-            //TextView txt = (TextView) findViewById(R.id.output);
-            //txt.setText("Executed"); // txt.setText(result);
-            // might want to change "executed" for the returned string passed
-            // into onPostExecute() but that is upto you
+
         }
 
         @Override
@@ -1271,7 +1110,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         ArrayList<Double> energyXZ = new ArrayList<>();
 
         // loop through all parameters to apply LPF and get MEAN
-
         int measurementCount = imuMeasurement.size();
 
         for (int idx = 0; idx<measurementCount;idx++){
@@ -1294,7 +1132,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
             }
 
             // determine mean so long
-
             meanEnergyXZ = meanEnergyXZ + Math.pow(valueAccX,2) + Math.pow(valueAccZ,2);
             meanAccY = meanAccY + valueAccY;
             meanAccZ = meanAccZ + valueAccZ;
@@ -1305,7 +1142,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         meanEnergyXZ = meanEnergyXZ/measurementCount;
 
         // determine variance
-
         for (int idx = 0; idx<measurementCount;idx++) {
             varianceAccY = varianceAccY + Math.pow((filteredAccY.get(idx) - meanAccY),2);
             varianceAccZ = varianceAccZ + Math.pow((filteredAccZ.get(idx) - meanAccZ),2);
@@ -1314,7 +1150,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         // final calculations
 
-        //meanAccZ = meanAccZ/measurementCount;
         varianceAccY = varianceAccY/measurementCount;
         varianceAccZ = varianceAccZ/measurementCount;
         varianceEnergyXZ = varianceEnergyXZ/measurementCount;
@@ -1326,11 +1161,6 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
         // return features object
         features featureVals = new features(maxGyroY,varianceAccY,meanEnergyXZ,varianceEnergyXZ,varianceAccZ,meanAccZ,normalWalking);
-        //Log.d(TAG, "mean Acc Z: " + Double.toString(meanAccZ)); // YES
-        //Log.d(TAG, "measurement Count: " + Double.toString(measurementCount)); // YES
-        //Log.d(TAG,"mean Acc Y: " + Double.toString(meanAccY)); // YES
-        //Log.d(TAG, "energy mean: " + Double.toString(meanEnergyXZ));
-        //Log.d(TAG,"mean Acc X: " + Double.toString(meanAccX));
 
         return featureVals;
     }

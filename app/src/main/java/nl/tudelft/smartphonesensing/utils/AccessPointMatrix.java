@@ -26,7 +26,6 @@ public class AccessPointMatrix {
 
     public void createMatrix(Integer cellcount){
         matrix = new Double[cellcount][100]; // 100 bins for RSSI values
-        Log.d(TAG, "Matrix created");
     }
 
     public void addValue(Integer cellIndex, Integer level, Integer timesTrained, Boolean useFrequency){
@@ -38,7 +37,7 @@ public class AccessPointMatrix {
 
         //go through the required row and change existing values, and add the current level
         Integer cellCount = 0;
-        //Log.d(TAG, "Training cell " + cellIndex + " found level: "+ level + " training for the " + timesTrained + " time");
+
         for(Double cell : matrix[cellIndex]){
 
             if(cell == null){
@@ -62,20 +61,12 @@ public class AccessPointMatrix {
             else {
                 newCellValue = (cell * (timesTrained - 1)) / timesTrained;
 
-                if (!newCellValue.equals(0.0)) {
-                    Log.d(TAG, "Found existing value for index " + cellCount + " which has become:" + newCellValue);
-                }
-
                 if (cellCount.equals(level)) {
-                    Log.d(TAG, "before: " + newCellValue + "  1/times trained: " + (1.0 / timesTrained));
                     newCellValue += (1.0 / timesTrained);
-
-                    Log.d(TAG, "Yes equals to " + level + ", update to value: " + newCellValue);
                 }
             }
 
             // add new cell value to the matrix
-
             matrix[cellIndex][cellCount] = newCellValue;
 
             cellCount ++;
@@ -105,9 +96,6 @@ public class AccessPointMatrix {
 
         //create the file
         try {
-            if(context == null){
-                Log.d(TAG, "Context is null");
-            }
 
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(BSSID.replace(":","-")+".csv", context.MODE_PRIVATE));
             outputStreamWriter.write(csvText);
@@ -117,34 +105,7 @@ public class AccessPointMatrix {
             Log.e("Exception", "File write failed: " + e.toString());
         }
     }
-
-    public Double[] getProbabilityForCellFromLevel(Integer level){
-        //make the level absolute
-        level = Math.abs(level);
-
-        //create variable to store the values for each cell
-        Double[] valuePerCell = new Double[matrix.length];
-        Double sum = 0.0;
-
-        //get the values and summation
-        Integer cellCount = 0;
-        for(Double[] values : matrix){
-            sum += (values[level] == null) ? 0.0000001 : values[level];
-            valuePerCell[cellCount] = (values[level] == null) ? 0.0000001 : values[level];
-            cellCount++;
-        }
-
-        //normalize the values
-        cellCount = 0;
-        Double[] normalizedValues = new Double[matrix.length];
-        for(Double cellValue : valuePerCell){
-            normalizedValues[cellCount] = valuePerCell[cellCount] / sum;
-            cellCount++;
-        }
-
-        return normalizedValues;
-
-    }// convert access point matrix to string
+    // convert access point matrix to string
     public String toString(){
         String output = "[";
 

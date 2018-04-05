@@ -24,7 +24,6 @@ public class Compass extends ParticlesActivity implements SensorEventListener{
 
     private Context context;
     private SensorManager mSensorManager;
-    private Sensor mRotationV, mAccelerometer, mMagnetometer;
 
     private TextView wifi_status_text;
     private ImageView compass_needle;
@@ -86,8 +85,6 @@ public class Compass extends ParticlesActivity implements SensorEventListener{
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        //more interesting info: https://developer.android.com/guide/topics/sensors/sensors_position.html
-        //float azimuth = Math.round( ( ( Math.toDegrees( event.values[0] ) + 360 ) % 360) * 10 ) / 10;
 
         if(Math.abs(currentDegree - event.values[0]) > 2){
             String direction;
@@ -129,7 +126,6 @@ public class Compass extends ParticlesActivity implements SensorEventListener{
         up.setBackgroundColor(0x00000000);
         down.setBackgroundColor(0x00000000);
 
-        //Log.d(TAG, "before imageRotation: " + imageRotation);
 
         //get the value between 0 and 360
         while(imageRotation < 0){
@@ -137,7 +133,6 @@ public class Compass extends ParticlesActivity implements SensorEventListener{
         }
         imageRotation = imageRotation % 360;
 
-        //Log.d(TAG, "imageRotation: " + imageRotation);
 
         if(imageRotation > 45 && imageRotation < 135){
                 heading = "right";

@@ -11,6 +11,8 @@ import static android.content.Context.SENSOR_SERVICE;
 
 /**
  * Created by ernstmulders on 11/03/2018.
+ *
+ * This class is not used within the ParticleFilter, because our phones don't have a barometer
  */
 
 public class Barometer implements SensorEventListener {

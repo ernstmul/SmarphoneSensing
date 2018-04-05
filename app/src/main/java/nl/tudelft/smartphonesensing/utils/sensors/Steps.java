@@ -54,7 +54,7 @@ public class Steps extends ParticlesActivity implements SensorEventListener {
     }
 
     /**
-     * Unregisters the listerener event
+     * Unregisters the listener event
      */
     public void unregisterListener(){
         mSensorManager.unregisterListener(this);
@@ -75,7 +75,7 @@ public class Steps extends ParticlesActivity implements SensorEventListener {
         }
         if(is_home){steps_status_view.setText("Steps: " + stepCount + " stepsize:" + (19400 / stepCount));} //
         else{
-            Log.d("Steps", "Walking!");
+            //set the walking event to the super class
             super.walkingDetected(heading);
         }
     }
