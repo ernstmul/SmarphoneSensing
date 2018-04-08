@@ -22,6 +22,11 @@ public class floor4 {
     private List<ShapeDrawable> walls;
 
     /**
+     * The dividers.
+     */
+    private List<ShapeDrawable> dividers;
+
+    /**
      * The closed areas.
      */
     private List<ShapeDrawable> closed_areas;
@@ -81,6 +86,50 @@ public class floor4 {
     public floor4(int width, int height){
         this.screenWidth = width;
         this.screenHeight = height;
+    }
+
+    public List getDividers(int width, int height){
+        //initialize dividers
+        dividers = new ArrayList<>();
+
+        dividers.add(functionDimensionsToWall(5200,4400,2300,true));
+        dividers.add(functionDimensionsToWall(5200,9200,2300,true));
+        dividers.add(functionDimensionsToWall(5200,12600,2300,true));
+        dividers.add(functionDimensionsToWall(5200,18200,2300,true));
+
+        // doors of 5 and 7
+        dividers.add(functionDimensionsToWall(5200,10000,1600,false));
+        dividers.add(functionDimensionsToWall(5200, 13500,1500,false));
+
+        // 8 and 10 verticle
+        dividers.add(functionDimensionsToWall(5900,18200,3500,false));
+
+        // 11 and 12
+        dividers.add(functionDimensionsToWall(13100,18200,1300,false));
+
+        // 12 and 13
+        dividers.add(functionDimensionsToWall(13100,13800,1300,true));
+
+        // 13 and 14
+        dividers.add(functionDimensionsToWall(11700,10100,2700,true));
+
+        // 14 and 15
+        dividers.add(functionDimensionsToWall(11700,5800,2700,true));
+
+        // middle area
+        dividers.add(functionDimensionsToWall(7500,8000,2100,false));
+        dividers.add(functionDimensionsToWall(11700,8000,2100,false));
+
+        // door stairs
+        dividers.add(functionDimensionsToWall(7500,10450,1500,false));
+
+        // door cell 1
+        dividers.add(functionDimensionsToWall(7500,1000,1500,false));
+
+        // door cell 9
+        dividers.add(functionDimensionsToWall(4000,21700,1500,true));
+
+        return dividers;
     }
 
     public List getWalls(int width, int height){

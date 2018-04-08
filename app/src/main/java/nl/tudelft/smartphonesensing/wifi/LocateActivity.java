@@ -238,11 +238,6 @@ public class LocateActivity  extends AppCompatActivity {
                 thresholdReached = true;
             }
 
-
-
-
-
-
             // increase while loop counter
             whileLoopCounter++;
 
@@ -306,7 +301,7 @@ public class LocateActivity  extends AppCompatActivity {
                 }
             }
 
-            // write to where am I text box
+            // write to 'where am I' text box
             Double prct = (biggestCount/((double)measurement_number - 5))*100;
             locate_area_prediction_text.setText("I'm in : " + (mostOccuringIndex + 1) + "("+prct + "%)\n\n" + prob);
         }

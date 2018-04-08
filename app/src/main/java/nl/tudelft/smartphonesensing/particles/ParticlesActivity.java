@@ -62,6 +62,7 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
     private static Canvas canvas;
     private static List<ShapeDrawable> walls;
+    private static List<ShapeDrawable> dividers;
     private static List<ShapeDrawable> closed_areas;
     private static List<Particle> particlesList;
     private static Particle currentLocation;
@@ -230,11 +231,13 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
         if(floor == 3){
             floor3 floor3 = new floor3(screen_width,screen_height,floor3Width,floor3Height);
             walls = floor3.getWalls(screen_width, screen_height);
+            dividers = floor3.getDividers(screen_width,screen_height);
             closed_areas = floor3.getClosedAreas(screen_width, screen_height);
         }
         else{
             floor4 floor4 = new floor4(screen_width,screen_height);
             walls = floor4.getWalls(screen_width, screen_height);
+            dividers = floor4.getDividers(screen_width, screen_height);
             closed_areas = floor4.getClosedAreas(screen_width, screen_height);
         }
 
@@ -243,6 +246,11 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
        // draw the objects
         for(ShapeDrawable wall : walls)
             wall.draw(canvas);
+
+        for(ShapeDrawable divider : dividers) {
+            divider.getPaint().setColor(Color.GRAY);
+            divider.draw(canvas);
+        }
 
         // draw the closed areas if needed
         if(shouldDrawClosedAreas) {
@@ -803,12 +811,14 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
                         floor4 floor4 = new floor4(screen_width,screen_height);
                         walls = floor4.getWalls(screen_width, screen_height);
                         closed_areas = floor4.getClosedAreas(screen_width, screen_height);
+                        dividers = floor4.getDividers(screen_width,screen_height);
                         floor = 4;
                     }
                     else{
                         floor3 floor3 = new floor3(screen_width,screen_height,floor3Width,floor3Height);
                         walls = floor3.getWalls(screen_width, screen_height);
                         closed_areas = floor3.getClosedAreas(screen_width, screen_height);
+                        dividers = floor3.getDividers(screen_width,screen_height);
                         floor = 3;
                     }
 
@@ -1055,6 +1065,11 @@ public class ParticlesActivity extends AppCompatActivity implements View.OnClick
 
             for(Particle particle : particlesList){
                 particle.redraw();
+            }
+
+            for(ShapeDrawable divider : dividers) {
+                divider.getPaint().setColor(Color.GRAY);
+                divider.draw(canvas);
             }
 
             //redraw the closed areas if needed

@@ -22,6 +22,11 @@ public class floor3 {
     private List<ShapeDrawable> walls;
 
     /**
+     * The dividers.
+     */
+    private List<ShapeDrawable> dividers;
+
+    /**
      * The closed areas.
      */
     private List<ShapeDrawable> closed_areas;
@@ -70,6 +75,24 @@ public class floor3 {
 
 
         return closed_areas;
+    }
+
+    public List getDividers(int width, int height){
+        //initialize dividers
+        dividers = new ArrayList<>();
+
+        //dividers.add(functionDimensionsToWall(0,200,14400,true));
+
+        // door cell 18
+        dividers.add(functionDimensionsToWall(7500,300,1500,false));
+
+        // door stairs
+        dividers.add(functionDimensionsToWall(7500,10450,1500,false));
+
+        // door cell 20
+        dividers.add(functionDimensionsToWall(9400,19700,1600,false));
+
+        return dividers;
     }
 
     public List getWalls(int width, int height){
